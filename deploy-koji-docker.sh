@@ -4,9 +4,9 @@
 
 set -xe
 SCRIPT_DIR="$(dirname "$(realpath "$0")")"
+export HOST=jptest03.mvista.com
 source "$SCRIPT_DIR"/globals.sh
 source "$SCRIPT_DIR"/parameters.sh
-
 # INSTALL KOJI
 if [ -z "$(swupd bundle-list | grep koji)" ] ; then
 	swupd bundle-add koji
@@ -407,3 +407,6 @@ EOF
 fi
 
 systemctl enable --now kojira
+if ! ls $KOJI_DIR/repos/*/1 -d 2>/dev/null >/dev/null ; then
+	"$SCRIPT_DIR"/bootstrap-build.sh
+fi
