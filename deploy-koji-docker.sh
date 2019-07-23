@@ -244,7 +244,7 @@ Alias /kojifiles "$KOJI_DIR"
 EOF
 fi 
 
-if [ -e /etc/kojiweb/web.conf ] ; then
+if [ ! -e /etc/kojiweb/web.conf ] ; then
 # Koji Web
 mkdir -p /etc/kojiweb
 cat > /etc/kojiweb/web.conf <<- EOF
