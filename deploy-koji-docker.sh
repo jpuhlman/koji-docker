@@ -197,7 +197,7 @@ systemctl reload postgresql
 # SSL Certificate authentication
 if [ ! -e "$POSTGRES_DEFAULT_DIR"/.kojiadmin-insert ] ; then
 	sudo -u koji psql -c "insert into users (name, status, usertype) values ('kojiadmin', 0, 0);"
-	touch "$POSTGRES_DEFAULT_DIR"/.kojiadmin-inser
+	touch "$POSTGRES_DEFAULT_DIR"/.kojiadmin-insert
 fi
 
 # Give yourself admin permissions
@@ -207,6 +207,7 @@ if [ ! -e "$POSTGRES_DEFAULT_DIR"/.kojiadmin-userperms ] ; then
 fi
 ## KOJI CONFIGURATION FILES
 # Koji Hub
+if [ ! -e /etc/koji-hub/hub.conf ] ; then
 mkdir -p /etc/koji-hub
 cat > /etc/koji-hub/hub.conf <<- EOF
 [hub]
@@ -219,7 +220,8 @@ LoginCreatesUser = On
 KojiWebURL = $KOJI_URL/koji
 DisableNotifications = True
 EOF
-
+fi
+if [ ! -e /etc/httpd/conf.d/kojihub.conf ] ; then
 mkdir -p /etc/httpd/conf.d
 cat > /etc/httpd/conf.d/kojihub.conf <<- EOF
 Alias /kojihub /usr/share/koji-hub/kojixmlrpc.py
@@ -240,7 +242,9 @@ Alias /kojifiles "$KOJI_DIR"
     SSLOptions +StdEnvVars
 </Location>
 EOF
+fi 
 
+if [ -e /etc/kojiweb/web.conf ] ; then
 # Koji Web
 mkdir -p /etc/kojiweb
 cat > /etc/kojiweb/web.conf <<- EOF
@@ -256,7 +260,8 @@ Secret = NITRA_IS_NOT_CLEAR
 LibPath = /usr/share/koji-web/lib
 LiteralFooter = True
 EOF
-
+fi
+if [ ! -e /etc/httpd/conf.d/kojiweb.conf ] ; then
 mkdir -p /etc/httpd/conf.d
 cat > /etc/httpd/conf.d/kojiweb.conf <<- EOF
 Alias /koji "/usr/share/koji-web/scripts/wsgi_publisher.py"
@@ -272,7 +277,8 @@ Alias /koji-static "/usr/share/koji-web/static"
     Require all granted
 </Directory>
 EOF
-
+fi
+if [ ! -e "$ADMIN_KOJI_DIR"/config ] ; then
 # Koji CLI
 cat > "$ADMIN_KOJI_DIR"/config <<- EOF
 [koji]
@@ -286,12 +292,16 @@ serverca = ~/.koji/serverca.crt
 anon_retry = true
 EOF
 chown kojiadmin:kojiadmin "$ADMIN_KOJI_DIR"/config
+fi
 
+if [ ! -e "$KOJI_DIR"/packages ] ; then
 ## KOJI APPLICATION HOSTING
 # Koji Filesystem Skeleton
 mkdir -p "$KOJI_DIR"/{packages,repos,work,scratch,repos-dist}
 chown -R "$HTTPD_USER":"$HTTPD_USER" "$KOJI_DIR"
+fi
 
+if [ ! -e /etc/httpd/conf.d/ssl.conf ] ; then
 ## Apache Configuration Files
 mkdir -p /etc/httpd/conf.d
 cat > /etc/httpd/conf.d/ssl.conf <<- EOF
@@ -333,7 +343,9 @@ SSLRandomSeed connect builtin
     CustomLog /var/log/httpd/ssl_request_log "%t %h %{SSL_PROTOCOL}x %{SSL_CIPHER}x \"%r\" %b"
 </VirtualHost>
 EOF
+fi
 
+if [ ! -e /etc/httpd/conf.modules.d/wsgi.conf ] ; then
 mkdir -p /etc/httpd/conf.modules.d
 cat > /etc/httpd/conf.modules.d/wsgi.conf <<- EOF
 LoadModule wsgi_module lib/python2.7/site-packages/mod_wsgi/server/mod_wsgi-py27.so
@@ -342,6 +354,7 @@ EOF
 cat > /etc/httpd/conf.modules.d/ssl.conf <<- EOF
 LoadModule ssl_module lib/httpd/modules/mod_ssl.so
 EOF
+fi
 
 systemctl enable --now httpd
 
@@ -349,21 +362,24 @@ systemctl enable --now httpd
 ## TEST KOJI CONNECTIVITY
 sudo -u kojiadmin koji moshimoshi
 
-
 ## KOJI DAEMON - BUILDER
 # Add the host entry for the koji builder to the database
-sudo -u kojiadmin koji add-host "$KOJI_SLAVE_FQDN" "$RPM_ARCH"
+if [ -z "$(sudo -u kojiadmin koji list-hosts | grep -v ^Hostname | grep "$KOJI_SLAVE_FQDN")" ] ; then
+	sudo -u kojiadmin koji add-host "$KOJI_SLAVE_FQDN" "$RPM_ARCH"
+fi
 
 # Add the host to the createrepo channel
-sudo -u kojiadmin koji add-host-to-channel "$KOJI_SLAVE_FQDN" createrepo
+sudo -u kojiadmin koji add-host-to-channel "$KOJI_SLAVE_FQDN" createrepo || true
 
 # A note on capacity
 sudo -u kojiadmin koji edit-host --capacity="$KOJID_CAPACITY" "$KOJI_SLAVE_FQDN"
 
 # Generate certificates
+if [ ! -e /etc/pki/koji/certs/"$KOJI_SLAVE_FQDN".crt ] ; then 
 pushd "$KOJI_PKI_DIR"
 ./gencert.sh "$KOJI_SLAVE_FQDN" "/C=$COUNTRY_CODE/ST=$STATE/L=$LOCATION/O=$ORGANIZATION/CN=$KOJI_SLAVE_FQDN"
 popd
+fi
 
 if [[ "$KOJI_SLAVE_FQDN" = "$KOJI_MASTER_FQDN" ]]; then
 	"$SCRIPT_DIR"/deploy-koji-builder.sh
@@ -372,9 +388,10 @@ fi
 
 ## KOJIRA - DNF|YUM REPOSITORY CREATION AND MAINTENANCE
 # Add the user entry for the kojira user
-sudo -u kojiadmin koji add-user kojira
-sudo -u kojiadmin koji grant-permission repo kojira
+sudo -u kojiadmin koji add-user kojira || true
+sudo -u kojiadmin koji grant-permission repo kojira || true
 
+if [ ! -e /etc/kojira/kojira.conf ] ; then
 # Kojira Configuration Files
 mkdir -p /etc/kojira
 cat > /etc/kojira/kojira.conf <<- EOF
@@ -387,5 +404,6 @@ cert = $KOJI_PKI_DIR/kojira.pem
 ca = $KOJI_PKI_DIR/koji_ca_cert.crt
 serverca = $KOJI_PKI_DIR/koji_ca_cert.crt
 EOF
+fi
 
 systemctl enable --now kojira
