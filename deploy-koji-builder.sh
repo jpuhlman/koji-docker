@@ -27,7 +27,8 @@ if [[ "$KOJI_SLAVE_FQDN" = "$KOJI_MASTER_FQDN" ]]; then
 else
 	KOJI_TOP_DIR="$KOJI_MOUNT_DIR"
 fi
-mkdir -p /etc/kojid
+mkdir -p /config/kojid
+ln -sf /config/kojid /etc/kojid 
 if [ ! -e /etc/kojid/kojid.conf ] ; then
 cat > /etc/kojid/kojid.conf <<- EOF
 [kojid]

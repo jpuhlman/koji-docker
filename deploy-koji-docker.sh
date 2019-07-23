@@ -13,6 +13,13 @@ if [ -z "$(swupd bundle-list | grep koji)" ] ; then
 fi
 
 ## SETTING UP SSL CERTIFICATES FOR AUTHENTICATION
+
+mkdir -p /config/$(echo "$KOJI_PKI_DIR" | sed s,/etc/,,)
+if [ -e "$KOJI_PKI_DIR" -a ! -L "$KOJI_PKI_DIR" ] ; then
+	cp -a "$KOJI_PKI_DIR"/* /config/$(echo $KOJI_PKI_DIR | sed s,/etc/,,)/
+        rm -rf "$KOJI_PKI_DIR"
+fi
+ln -s /config/$(echo $KOJI_PKI_DIR | sed s,/etc/,,) $KOJI_PKI_DIR
 mkdir -p "$KOJI_PKI_DIR"/{certs,private}
 RANDFILE="$KOJI_PKI_DIR"/.rand
 dd if=/dev/urandom of="$RANDFILE" bs=256 count=1
@@ -107,7 +114,14 @@ fi
 if [ ! -e "$KOJI_PKI_DIR"/private/koji_ca_cert.key -o ! -e "$KOJI_PKI_DIR"/koji_ca_cert.crt ] ; then
 	openssl req -subj "/C=$COUNTRY_CODE/ST=$STATE/L=$LOCATION/O=$ORGANIZATION/OU=koji_ca/CN=$KOJI_MASTER_FQDN" -config "$KOJI_PKI_DIR"/ssl.cnf -new -x509 -days 3650 -key "$KOJI_PKI_DIR"/private/koji_ca_cert.key -out "$KOJI_PKI_DIR"/koji_ca_cert.crt -extensions v3_ca
 fi
-mkdir -p /etc/ca-certs/trusted
+mkdir -p /config/ca-certs/trusted
+mkdir -p /etc/ca-certs
+if [ -e "/ect/ca-certs/trusted" -a ! -L "/ect/ca-certs/trusted" ] ; then
+	        cp -a /ect/ca-certs/trusted/* /config/ca-certs/trusted
+		        rm -rf /ect/ca-certs/trusted/
+fi
+ln -s /config/ca-certs/trusted /etc/ca-certs/trusted
+
 cp -a "$KOJI_PKI_DIR"/koji_ca_cert.crt /etc/ca-certs/trusted
 while true; do
 	if clrtrust generate; then
@@ -208,7 +222,8 @@ fi
 ## KOJI CONFIGURATION FILES
 # Koji Hub
 if [ ! -e /etc/koji-hub/hub.conf ] ; then
-mkdir -p /etc/koji-hub
+mkdir -p /config/koji-hub
+ln -s /config/koji-hub /etc/koji-hub
 cat > /etc/koji-hub/hub.conf <<- EOF
 [hub]
 DBName = koji
@@ -222,6 +237,9 @@ DisableNotifications = True
 EOF
 fi
 if [ ! -e /etc/httpd/conf.d/kojihub.conf ] ; then
+mkdir -p /config/httpd
+ln -s /config/httpd /etc/httpd
+
 mkdir -p /etc/httpd/conf.d
 cat > /etc/httpd/conf.d/kojihub.conf <<- EOF
 Alias /kojihub /usr/share/koji-hub/kojixmlrpc.py
@@ -246,7 +264,8 @@ fi
 
 if [ ! -e /etc/kojiweb/web.conf ] ; then
 # Koji Web
-mkdir -p /etc/kojiweb
+mkdir -p /config/kojiweb
+ln -s /config/kojiweb
 cat > /etc/kojiweb/web.conf <<- EOF
 [web]
 SiteName = koji
@@ -393,7 +412,8 @@ sudo -u kojiadmin koji grant-permission repo kojira || true
 
 if [ ! -e /etc/kojira/kojira.conf ] ; then
 # Kojira Configuration Files
-mkdir -p /etc/kojira
+mkdir -p /config/kojira
+ln -s /config/kojira /etc/kojira
 cat > /etc/kojira/kojira.conf <<- EOF
 [kojira]
 server=$KOJI_URL/kojihub
