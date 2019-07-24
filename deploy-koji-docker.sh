@@ -15,6 +15,7 @@ fi
 ## SETTING UP SSL CERTIFICATES FOR AUTHENTICATION
 
 mkdir -p /config/$(echo "$KOJI_PKI_DIR" | sed s,/etc/,,)
+mkdir -p $(dirname $KOJI_PKI_DIR)
 if [ -e "$KOJI_PKI_DIR" -a ! -L "$KOJI_PKI_DIR" ] ; then
 	cp -a "$KOJI_PKI_DIR"/* /config/$(echo $KOJI_PKI_DIR | sed s,/etc/,,)/
         rm -rf "$KOJI_PKI_DIR"
@@ -236,6 +237,7 @@ KojiWebURL = $KOJI_URL/koji
 DisableNotifications = True
 EOF
 fi
+
 if [ ! -e /etc/httpd/conf.d/kojihub.conf ] ; then
 mkdir -p /config/httpd
 ln -s /config/httpd /etc/httpd
@@ -265,7 +267,7 @@ fi
 if [ ! -e /etc/kojiweb/web.conf ] ; then
 # Koji Web
 mkdir -p /config/kojiweb
-ln -s /config/kojiweb
+ln -s /config/kojiweb /etc/kojiweb
 cat > /etc/kojiweb/web.conf <<- EOF
 [web]
 SiteName = koji
