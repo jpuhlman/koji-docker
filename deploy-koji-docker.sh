@@ -7,6 +7,7 @@ SCRIPT_DIR="$(dirname "$(realpath "$0")")"
 export HOST=jptest03.mvista.com
 source "$SCRIPT_DIR"/globals.sh
 source "$SCRIPT_DIR"/parameters.sh
+rm -f $COMMON_CONFIG/.done
 # INSTALL KOJI
 if [ -z "$(swupd bundle-list | grep koji)" ] ; then
 	swupd bundle-add koji
@@ -14,14 +15,14 @@ fi
 systemctl stop postgresql httpd kojira || true
 ## SETTING UP SSL CERTIFICATES FOR AUTHENTICATION
 
-mkdir -p /config/$(echo "$KOJI_PKI_DIR" | sed s,/etc/,,)
+mkdir -p $COMMON_CONFIG/$(echo "$KOJI_PKI_DIR" | sed s,/etc/,,)
 mkdir -p $(dirname $KOJI_PKI_DIR)
 if [ -e "$KOJI_PKI_DIR" -a ! -L "$KOJI_PKI_DIR" ] ; then
-	cp -a "$KOJI_PKI_DIR"/* /config/$(echo $KOJI_PKI_DIR | sed s,/etc/,,)/
+	cp -a "$KOJI_PKI_DIR"/* $COMMON_CONFIG/$(echo $KOJI_PKI_DIR | sed s,/etc/,,)/
         rm -rf "$KOJI_PKI_DIR"
 fi
 if [ ! -L $KOJI_PKI_DIR ] ; then
-	ln -s /config/$(echo $KOJI_PKI_DIR | sed s,/etc/,,) $KOJI_PKI_DIR
+	ln -s $COMMON_CONFIG/$(echo $KOJI_PKI_DIR | sed s,/etc/,,) $KOJI_PKI_DIR
 fi
 mkdir -p "$KOJI_PKI_DIR"/{certs,private}
 RANDFILE="$KOJI_PKI_DIR"/.rand
@@ -117,15 +118,7 @@ fi
 if [ ! -e "$KOJI_PKI_DIR"/private/koji_ca_cert.key -o ! -e "$KOJI_PKI_DIR"/koji_ca_cert.crt ] ; then
 	openssl req -subj "/C=$COUNTRY_CODE/ST=$STATE/L=$LOCATION/O=$ORGANIZATION/OU=koji_ca/CN=$KOJI_MASTER_FQDN" -config "$KOJI_PKI_DIR"/ssl.cnf -new -x509 -days 3650 -key "$KOJI_PKI_DIR"/private/koji_ca_cert.key -out "$KOJI_PKI_DIR"/koji_ca_cert.crt -extensions v3_ca
 fi
-mkdir -p /config/ca-certs/trusted
-mkdir -p /etc/ca-certs
-if [ -e "/ect/ca-certs/trusted" -a ! -L "/ect/ca-certs/trusted" ] ; then
-	cp -a /ect/ca-certs/trusted/* /config/ca-certs/trusted
-	rm -rf /ect/ca-certs/trusted/
-fi
-if [ ! -L /etc/ca-certs/trusted ] ; then
-   	ln -s /config/ca-certs/trusted /etc/ca-certs/trusted
-fi 
+mkdir -p /etc/ca-certs/trusted
 cp -a "$KOJI_PKI_DIR"/koji_ca_cert.crt /etc/ca-certs/trusted
 while true; do
 	if clrtrust generate; then
@@ -152,9 +145,12 @@ popd
 
 # Copy certificates into ~/.koji for kojiadmin
 if [ -z "$(id kojiadmin)" ] ; then
-	useradd kojiadmin
+	useradd kojiadmin -d $COMMON_CONFIG/kojiadmin
+elif [ ! -d $COMMON_CONFIG/kojiadmin ] ; then
+	mkdir -p $COMMON_CONFIG/kojiadmin
+	chown -R kojiadmin.kojiadmin $COMMON_CONFIG/kojiadmin
 fi
-
+chmod 755 $COMMON_CONFIG/kojiadmin
 ADMIN_KOJI_DIR="$(echo ~kojiadmin)"/.koji
 mkdir -p "$ADMIN_KOJI_DIR"
 cp -f "$KOJI_PKI_DIR"/kojiadmin.pem "$ADMIN_KOJI_DIR"/client.crt
@@ -226,9 +222,9 @@ fi
 ## KOJI CONFIGURATION FILES
 # Koji Hub
 if [ ! -e /etc/koji-hub/hub.conf ] ; then
-mkdir -p /config/koji-hub
+mkdir -p $COMMON_CONFIG/koji-hub
 if [ ! -L /etc/koji-hub ] ; then
-	ln -s /config/koji-hub /etc/koji-hub
+	ln -s $COMMON_CONFIG/koji-hub /etc/koji-hub
 fi
 cat > /etc/koji-hub/hub.conf <<- EOF
 [hub]
@@ -244,9 +240,9 @@ EOF
 fi
 
 if [ ! -e /etc/httpd/conf.d/kojihub.conf ] ; then
-mkdir -p /config/httpd
+mkdir -p $COMMON_CONFIG/httpd
 if [ ! -L /etc/httpd ] ; then
-	ln -s /config/httpd /etc/httpd
+	ln -s $COMMON_CONFIG/httpd /etc/httpd
 fi
 mkdir -p /etc/httpd/conf.d
 cat > /etc/httpd/conf.d/kojihub.conf <<- EOF
@@ -272,9 +268,9 @@ fi
 
 if [ ! -e /etc/kojiweb/web.conf ] ; then
 # Koji Web
-mkdir -p /config/kojiweb
+mkdir -p $COMMON_CONFIG/kojiweb
 if [ ! -L /etc/kojiweb ] ; then
-	ln -s /config/kojiweb /etc/kojiweb
+	ln -s $COMMON_CONFIG/kojiweb /etc/kojiweb
 fi
 cat > /etc/kojiweb/web.conf <<- EOF
 [web]
@@ -307,9 +303,9 @@ Alias /koji-static "/usr/share/koji-web/static"
 </Directory>
 EOF
 fi
-if [ ! -e "$ADMIN_KOJI_DIR"/config ] ; then
+if [ ! -e "$ADMIN_KOJI_DIR"$COMMON_CONFIG ] ; then
 # Koji CLI
-cat > "$ADMIN_KOJI_DIR"/config <<- EOF
+cat > "$ADMIN_KOJI_DIR"$COMMON_CONFIG <<- EOF
 [koji]
 server = $KOJI_URL/kojihub
 weburl = $KOJI_URL/koji
@@ -320,7 +316,7 @@ ca = ~/.koji/clientca.crt
 serverca = ~/.koji/serverca.crt
 anon_retry = true
 EOF
-chown kojiadmin:kojiadmin "$ADMIN_KOJI_DIR"/config
+chown kojiadmin:kojiadmin "$ADMIN_KOJI_DIR"$COMMON_CONFIG
 fi
 
 if [ ! -e "$KOJI_DIR"/packages ] ; then
@@ -422,9 +418,9 @@ sudo -u kojiadmin koji grant-permission repo kojira || true
 
 if [ ! -e /etc/kojira/kojira.conf ] ; then
 # Kojira Configuration Files
-mkdir -p /config/kojira
+mkdir -p $COMMON_CONFIG/kojira
 if [ ! -L /etc/kojira ] ; then
-	ln -s /config/kojira /etc/kojira
+	ln -s $COMMON_CONFIG/kojira /etc/kojira
 fi
 cat > /etc/kojira/kojira.conf <<- EOF
 [kojira]
@@ -442,3 +438,4 @@ systemctl start kojira
 if ! ls $KOJI_DIR/repos/*/1 -d 2>/dev/null >/dev/null ; then
 	"$SCRIPT_DIR"/bootstrap-build.sh
 fi
+touch $COMMON_CONFIG/.done

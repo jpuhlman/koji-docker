@@ -1,11 +1,11 @@
 #!/bin/bash
 # Copyright (C) 2019 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
-
+export
 ## KOJI RPM BUILD AND TRACKER
 export KOJI_DIR=/srv/koji
 export KOJI_MOUNT_DIR=/mnt/koji
-
+export COMMON_CONFIG=/config
 export KOJI_MASTER_FQDN="$HOST"
 if [ -z "$KOJI_MASTER_FQDN" ] ; then
 	echo Need to set "HOST" to system fully qualified domain name
