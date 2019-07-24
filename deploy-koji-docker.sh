@@ -179,7 +179,7 @@ fi
 if [ ! -e "$POSTGRES_DEFAULT_DIR"/data ] ; then
    sudo -u "$POSTGRES_USER" initdb --pgdata "$POSTGRES_DEFAULT_DIR"/data
 fi
-systemctl enable --now postgresql
+systemctl start postgresql
 
 # Setup User Accounts
 if [ -z "$(id koji)" ] ; then
@@ -385,7 +385,7 @@ LoadModule ssl_module lib/httpd/modules/mod_ssl.so
 EOF
 fi
 
-systemctl enable --now httpd
+systemctl start httpd
 
 
 ## TEST KOJI CONNECTIVITY
@@ -438,7 +438,7 @@ serverca = $KOJI_PKI_DIR/koji_ca_cert.crt
 EOF
 fi
 
-systemctl enable --now kojira
+systemctl start kojira
 if ! ls $KOJI_DIR/repos/*/1 -d 2>/dev/null >/dev/null ; then
 	"$SCRIPT_DIR"/bootstrap-build.sh
 fi
