@@ -4,7 +4,7 @@
 
 set -xe
 SCRIPT_DIR="$(dirname "$(realpath "$0")")"
-export HOST=jptest03.mvista.com
+
 source "$SCRIPT_DIR"/globals.sh
 source "$SCRIPT_DIR"/parameters.sh
 rm -f $COMMON_CONFIG/.done
