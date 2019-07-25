@@ -141,6 +141,9 @@ fi
 if [ ! -e "$KOJI_PKI_DIR"/certs/kojira.crt ] ; then
 	./gencert.sh kojira "/C=$COUNTRY_CODE/ST=$STATE/L=$LOCATION/O=$ORGANIZATION/OU=$ORG_UNIT/CN=kojira"
 fi
+if [ ! -e "$KOJI_PKI_DIR"/certs/user.crt ] ; then
+	./gencert.sh user "/C=$COUNTRY_CODE/ST=$STATE/L=$LOCATION/O=$ORGANIZATION/OU=$ORG_UNIT/CN=user"
+fi
 popd
 
 # Copy certificates into ~/.koji for kojiadmin
@@ -303,9 +306,9 @@ Alias /koji-static "/usr/share/koji-web/static"
 </Directory>
 EOF
 fi
-if [ ! -e "$ADMIN_KOJI_DIR"$COMMON_CONFIG ] ; then
+if [ ! -e "$ADMIN_KOJI_DIR"/config ] ; then
 # Koji CLI
-cat > "$ADMIN_KOJI_DIR"$COMMON_CONFIG <<- EOF
+cat > "$ADMIN_KOJI_DIR"/config <<- EOF
 [koji]
 server = $KOJI_URL/kojihub
 weburl = $KOJI_URL/koji
@@ -316,8 +319,14 @@ ca = ~/.koji/clientca.crt
 serverca = ~/.koji/serverca.crt
 anon_retry = true
 EOF
-chown kojiadmin:kojiadmin "$ADMIN_KOJI_DIR"$COMMON_CONFIG
+chown kojiadmin:kojiadmin "$ADMIN_KOJI_DIR"/config
 fi
+mkdir -p $COMMON_CONFIG/user
+chmod 755 $COMMON_CONFIG/user
+cp -f "$ADMIN_KOJI_DIR"/config $COMMON_CONFIG/user
+cp -f "$KOJI_PKI_DIR"/koji_ca_cert.crt "$COMMON_CONFIG"/user/clientca.crt
+cp -f "$KOJI_PKI_DIR"/koji_ca_cert.crt "$COMMON_CONFIG"/user/serverca.crt
+cp -f "$KOJI_PKI_DIR"/user.pem "$COMMON_CONFIG"/user/client.crt 
 
 if [ ! -e "$KOJI_DIR"/packages ] ; then
 ## KOJI APPLICATION HOSTING
@@ -409,7 +418,10 @@ fi
 if [[ "$KOJI_SLAVE_FQDN" = "$KOJI_MASTER_FQDN" ]]; then
 	"$SCRIPT_DIR"/deploy-koji-builder.sh
 fi
-
+mkdir -p $COMMON_CONFIG/koji
+if [ ! -L /etc/koji ] ; then
+	  ln -s $COMMON_CONFIG/koji /etc/koji
+fi
 
 ## KOJIRA - DNF|YUM REPOSITORY CREATION AND MAINTENANCE
 # Add the user entry for the kojira user
@@ -439,3 +451,10 @@ if ! ls $KOJI_DIR/repos/*/1 -d 2>/dev/null >/dev/null ; then
 	"$SCRIPT_DIR"/bootstrap-build.sh
 fi
 touch $COMMON_CONFIG/.done
+if [ ! -e /etc/koji/app.list ] ; then
+   cp "$SCRIPT_DIR"/app.list /etc/koji/
+fi
+
+#Add all the packages
+"$SCRIPT_DIR"/package-add.sh
+

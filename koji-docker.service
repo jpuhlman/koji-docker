@@ -1,0 +1,19 @@
+[Unit]
+Description=Koji docker container
+Requires=docker.service
+After=docker.service
+
+[Service]
+Restart=always
+ExecStartPre=-/usr/bin/docker kill koji-docker
+ExecStartPre=-/usr/bin/docker rm koji-docker
+ExecStart=/usr/bin/docker run --name koji-docker \
+                              -p 80:80 \
+                              -p 443:443 \
+                              -v /srv/koji-docker/config:/config \
+                              -v /srv/koji-docker/srv \
+                              -t koji-docker:latest
+ExecStop=/usr/bin/docker stop -t 2 koji-docker
+
+[Install]
+WantedBy=local.target
