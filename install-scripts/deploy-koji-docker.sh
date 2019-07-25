@@ -5,8 +5,17 @@
 set -xe
 SCRIPT_DIR="$(dirname "$(realpath "$0")")"
 
+ECTKOJI=/etc/koji
+
 source "$SCRIPT_DIR"/globals.sh
 source "$SCRIPT_DIR"/parameters.sh
+if [ -e "$ECTKOJI"/parameters.sh ] ; then
+	source "$ECTKOJI"/parameters.sh
+fi
+if [ -e "$ECTKOJI"/globals.sh ] ; then
+	source "$ECTKOJI"/globals.sh
+fi
+
 rm -f $COMMON_CONFIG/.done
 # INSTALL KOJI
 if [ -z "$(swupd bundle-list | grep koji)" ] ; then
@@ -450,9 +459,16 @@ systemctl start kojira
 if ! ls $KOJI_DIR/repos/*/1 -d 2>/dev/null >/dev/null ; then
 	"$SCRIPT_DIR"/bootstrap-build.sh
 fi
+
 touch $COMMON_CONFIG/.done
-if [ ! -e /etc/koji/app.list ] ; then
-   cp "$SCRIPT_DIR"/app.list /etc/koji/
+if [ ! -e "$ECTKOJI"/app.list ] ; then
+   cp "$SCRIPT_DIR"/app.list "$ECTKOJI"
+fi
+if [ ! -e "$ECTKOJI"/parameters.sh ] ; then
+	cp "$SCRIPT_DIR"/parameters.sh "$ECTKOJI"/parameters.sh
+fi
+if [ ! -e "$ECTKOJI"/globals.sh ] ; then
+	cp "$SCRIPT_DIR"/globals.sh "$ECTKOJI"/globals.sh
 fi
 
 #Add all the packages
