@@ -4,7 +4,7 @@
 ## KOJI RPM BUILD AND TRACKER
 
 TMPFILE=$(mktemp)
-hostenv.sh > $TMPFILE
+sudo hostenv.sh > $TMPFILE
 source $TMPFILE
 cat $TMPFILE
 rm -rf $TMPFILE
