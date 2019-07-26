@@ -15,6 +15,8 @@ COPY install-scripts/bootstrap-build.sh  \
      install-scripts/globals.sh \
      install-scripts/parameters.sh \
      install-scripts/package-add.sh \
+     install-scripts/deploy-mash.sh \
+     install-scripts/mash.sh \
      configs/app.list \
      /usr/share/koji-docker/
 RUN mkdir -p /usr/sbin/
