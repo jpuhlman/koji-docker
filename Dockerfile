@@ -26,5 +26,7 @@ RUN chmod 755 /usr/share/koji-docker/*.sh
 RUN mkdir -p /etc/systemd/system/
 COPY container-services/koji-setup.service /etc/systemd/system/
 RUN systemctl enable koji-setup
+RUN mkdir -p /etc/sudoers.d/
+RUN echo "kojiadmin  ALL=NOPASSWD: /usr/bin/hostenv.sh" | tee -a /etc/sudoers.d/visudo
 RUN echo "root:$(echo 'password' | openssl passwd -1 -stdin):18099::::::" >> /etc/shadow
 CMD [ "/sbin/init" ]
