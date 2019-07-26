@@ -22,6 +22,7 @@ export KOJI_MOUNT_DIR=/mnt/koji
 export KOJI_SLAVE_FQDN="$KOJI_MASTER_FQDN"
 export KOJID_CAPACITY=16
 export TAG_NAME=centos-updates-mv
+export DISTRO_NAME="centos-updates"
 # Use for koji SSL certificates
 export COUNTRY_CODE='US'
 export STATE='California'

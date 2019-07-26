@@ -474,3 +474,4 @@ fi
 #Add all the packages
 "$SCRIPT_DIR"/package-add.sh
 
+"$SCRIPT_DIR"/deploy-mash.sh
