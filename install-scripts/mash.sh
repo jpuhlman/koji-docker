@@ -6,8 +6,12 @@ set -xe
 if [[ -e /etc/profile.d/proxy.sh ]]; then
 	source /etc/profile.d/proxy.sh
 fi
+if [ -e /etc/koji/parameters.sh ] ; then
+	source /etc/koji/parameters.sh
+fi
 
 TAG_NAME="${TAG_NAME:-clear}"
+DISTRO_NAME="${DISTRO_NAME:-clear}"
 BUILD_ARCH="${BUILD_ARCH:-x86_64}"
 KOJI_DIR="${KOJI_DIR:-/srv/koji}"
 MASH_DIR="${MASH_DIR:-/srv/mash}"
@@ -33,12 +37,12 @@ if [[ "$MASH_BUILD_NUM" -ne "$KOJI_BUILD_NUM" ]]; then
 	koji show-groups --comps dist-"$TAG_NAME"-build > "$COMPS_FILE"
 	rm -rf "$MASH_DIR_NEW"
 	mkdir -p "$MASH_DIR_NEW"
-	mash --outputdir="$MASH_DIR_NEW" --compsfile="$COMPS_FILE" clear
+	mash --outputdir="$MASH_DIR_NEW" --compsfile="$COMPS_FILE" "$DISTRO_NAME"
 	rm -f "$COMPS_FILE"
 
-	write_packages_file "$MASH_DIR_NEW"/clear/"$BUILD_ARCH"/os/Packages "$MASH_DIR_NEW"/clear/"$BUILD_ARCH"/packages-os
-	write_packages_file "$MASH_DIR_NEW"/clear/"$BUILD_ARCH"/debug "$MASH_DIR_NEW"/clear/"$BUILD_ARCH"/packages-debug
-	write_packages_file "$MASH_DIR_NEW"/clear/source/SRPMS "$MASH_DIR_NEW"/clear/source/packages-SRPMS
+	write_packages_file "$MASH_DIR_NEW"/"$DISTRO_NAME"/"$BUILD_ARCH"/os/Packages "$MASH_DIR_NEW"/"$DISTRO_NAME"/"$BUILD_ARCH"/packages-os
+	write_packages_file "$MASH_DIR_NEW"/"$DISTRO_NAME"/"$BUILD_ARCH"/debug "$MASH_DIR_NEW"/"$DISTRO_NAME"/"$BUILD_ARCH"/packages-debug
+	write_packages_file "$MASH_DIR_NEW"/"$DISTRO_NAME"/source/SRPMS "$MASH_DIR_NEW"/"$DISTRO_NAME"/source/packages-SRPMS
 
 	if [[ -e "$MASH_TRACKER_DIR" ]]; then
 		mv "$MASH_TRACKER_DIR" "$MASH_DIR_OLD"
