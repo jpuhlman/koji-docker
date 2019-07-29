@@ -64,4 +64,12 @@ if env | grep -q proxy; then
 	systemctl daemon-reload
 fi
 
+mkdir -p /config/logs/kojid
+if [ -f /var/log/kojid.log ] ; then
+	mv /var/log/kojid.log /config/logs/kojid/
+fi
+touch /config/logs/kojid/kojid.log
+if [ ! -L /var/log/kojid.log ] ; then
+	ln -s /config/logs/kojid/kojid.log /var/log/kojid.log
+fi
 systemctl enable --now kojid

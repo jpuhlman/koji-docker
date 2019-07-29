@@ -447,12 +447,20 @@ cat > /etc/kojira/kojira.conf <<- EOF
 [kojira]
 server=$KOJI_URL/kojihub
 topdir=$KOJI_DIR
-logfile=/var/log/kojira.log
+logfile=/config/logs/kojira/kojira.log
 with_src=no
 cert = $KOJI_PKI_DIR/kojira.pem
 ca = $KOJI_PKI_DIR/koji_ca_cert.crt
 serverca = $KOJI_PKI_DIR/koji_ca_cert.crt
 EOF
+	mkdir -p /var/log/
+	mkdir -p /config/logs/kojira/
+	if [ -f /var/log/kojira.log ] ; then
+		mv /var/log/kojira.log /config/logs/kojira/
+	fi
+	if [ ! -L /var/log/kojira.log ] ; then
+		ln -s /config/logs/kojira/kojira.log /var/log/kojira.log
+	fi
 fi
 
 systemctl start kojira
