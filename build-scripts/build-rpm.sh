@@ -20,15 +20,19 @@ fi
 if [ -z "$(git config --global user.jenkins)" ] ; then
 	git config --global user.name "$USER_NAME"
 fi
-pushd $BUILD_LOCATION
-	if [ ! -d packages/rpm ] ; then
-		make clone_rpm PKG_BASE_URL=$MV_CUSTOM_RPM
+PACKAGES="rpm librepo"
+mkdir -p $COPY_LOCATION/rpms/
+for package in $PACKAGES; do
+    pushd $BUILD_LOCATION
+	if [ ! -d packages/$package ] ; then
+		make clone_$package PKG_BASE_URL=$MV_CUSTOM_RPM
 	fi
-	pushd packages/rpm
+	pushd packages/$package
 		if [ ! -d rpms -o -z "$(ls rpms/*.rpm)" ] ; then
 			make build
 		fi
 		RPMSDIR=$(readlink -f rpms)
 	popd
-popd
-cp -a $RPMSDIR $COPY_LOCATION
+    popd
+    cp -a $RPMSDIR $COPY_LOCATION
+done
