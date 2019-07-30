@@ -7,13 +7,15 @@ SCRIPT_DIR="$(dirname "$(realpath "$0")")"
 
 ECTKOJI=/etc/koji
 
-source "$SCRIPT_DIR"/globals.sh
-source "$SCRIPT_DIR"/parameters.sh
-if [ -e "$ECTKOJI"/parameters.sh ] ; then
-	source "$ECTKOJI"/parameters.sh
-fi
 if [ -e "$ECTKOJI"/globals.sh ] ; then
 	source "$ECTKOJI"/globals.sh
+else
+	source "$SCRIPT_DIR"/globals.sh
+fi
+if [ -e "$ECTKOJI"/parameters.sh ] ; then
+	source "$ECTKOJI"/parameters.sh
+else
+	source "$SCRIPT_DIR"/parameters.sh
 fi
 
 rm -f $COMMON_CONFIG/.done

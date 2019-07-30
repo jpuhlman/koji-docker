@@ -4,8 +4,19 @@
 
 set -xe
 SCRIPT_DIR="$(dirname "$(realpath "$0")")"
-source "$SCRIPT_DIR"/globals.sh
-source "$SCRIPT_DIR"/parameters.sh
+
+ECTKOJI=/etc/koji
+
+if [ -e "$ECTKOJI"/globals.sh ] ; then
+	source "$ECTKOJI"/globals.sh
+else
+	source "$SCRIPT_DIR"/globals.sh
+fi
+if [ -e "$ECTKOJI"/parameters.sh ] ; then
+	source "$ECTKOJI"/parameters.sh
+else
+	source "$SCRIPT_DIR"/parameters.sh
+fi
 
 if [[ -n "$SRC_RPM_DIR" && -n "$BIN_RPM_DIR" ]]; then
 	find "$SRC_RPM_DIR" -name '*.src.rpm' | xargs -n 1 -I {} sudo -u kojiadmin koji import {}

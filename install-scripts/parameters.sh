@@ -17,7 +17,7 @@ if [ -z "$KOJI_MASTER_FQDN" ] ; then
 	echo Need to set "HOST" to system fully qualified domain name
 	exit 1
 fi
-export KOJI_URL=http://"$KOJI_MASTER_FQDN"
+export KOJI_URL=https://"$KOJI_MASTER_FQDN"
 export KOJI_MOUNT_DIR=/mnt/koji
 export KOJI_SLAVE_FQDN="$KOJI_MASTER_FQDN"
 export KOJID_CAPACITY=16
