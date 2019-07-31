@@ -31,7 +31,17 @@ if [[ -e "$MASH_TRACKER_FILE" ]]; then
 else
 	MASH_BUILD_NUM=0
 fi
-KOJI_BUILD_NUM="$(basename "$(realpath "$KOJI_DIR"/repos/dist-"$TAG_NAME"-build/latest/)")"
+DISTRO_DIR="$KOJI_DIR"/repos/dist-"$TAG_NAME"-build
+CURRENT_KOJI_BUILD_NUM="$(basename "$(realpath "$DISTRO_DIR"/latest/)")"
+if [[ "$MASH_BUILD_NUM" -eq "$CURRENT_KOJI_BUILD_NUM" ]]; then
+	inotifywait -e create $DISTRO_DIR
+	NEWBUILD=$(ls $DISTRO_DIR | sort -n | tail -n 1)
+	KOJI_BUILD_NUM="$(basename "$(realpath "$DISTRO_DIR"/latest/)")"
+	if [ "$NEWBUILD" -ne "$KOJI_BUILD_NUM" ] ; then
+	   inotifywait -d modify $DISTRO_DIR
+	   KOJI_BUILD_NUM="$(basename "$(realpath "$DISTRO_DIR"/latest/)")"
+	fi
+fi
 if [[ "$MASH_BUILD_NUM" -ne "$KOJI_BUILD_NUM" ]]; then
 	COMPS_FILE="$(mktemp)"
 	koji show-groups --comps dist-"$TAG_NAME"-build > "$COMPS_FILE"

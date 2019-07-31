@@ -1,6 +1,6 @@
 FROM clearlinux:latest
 ENV container docker
-RUN swupd bundle-add sudo koji lua-basic
+RUN swupd bundle-add sudo koji lua-basic inotify-tools
 STOPSIGNAL SIGRTMIN+3
 RUN mkdir -p /tmp/rpms/
 RUN echo "If this next step fails, run ./build-scripts/build-rpm.sh"
