@@ -457,7 +457,7 @@ serverca = $KOJI_PKI_DIR/koji_ca_cert.crt
 EOF
 	mkdir -p /var/log/
 	mkdir -p /config/logs/kojira/
-	if [ -f /var/log/kojira.log ] ; then
+	if [ -f /var/log/kojira.log -a ! -L /var/log/kojira.log ] ; then
 		mv /var/log/kojira.log /config/logs/kojira/
 	fi
 	if [ ! -L /var/log/kojira.log ] ; then
