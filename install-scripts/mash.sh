@@ -33,6 +33,7 @@ else
 fi
 DISTRO_DIR="$KOJI_DIR"/repos/dist-"$TAG_NAME"-build
 CURRENT_KOJI_BUILD_NUM="$(basename "$(realpath "$DISTRO_DIR"/latest/)")"
+KOJI_BUILD_NUM="$CURRENT_KOJI_BUILD_NUM"
 if [[ "$MASH_BUILD_NUM" -eq "$CURRENT_KOJI_BUILD_NUM" ]]; then
 	inotifywait -e create $DISTRO_DIR
 	NEWBUILD=$(ls $DISTRO_DIR | sort -n | tail -n 1)
