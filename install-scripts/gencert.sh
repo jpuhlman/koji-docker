@@ -11,6 +11,7 @@ if [ -z "$CERT_SUBJECT" ]; then
 else
 	openssl req -subj "$CERT_SUBJECT" -config ssl.cnf -new -nodes -out certs/"$KOJI_USER".csr -key private/"$KOJI_USER".key
 fi
+echo $(($(cat index.txt | while read A B C D; do echo $C; done | tail -n 1) + 1)) > serial
 openssl ca -batch -config ssl.cnf -keyfile private/koji_ca_cert.key -cert koji_ca_cert.crt -out certs/"$KOJI_USER".crt -outdir certs -infiles certs/"$KOJI_USER".csr
 cat certs/"$KOJI_USER".crt private/"$KOJI_USER".key > "$KOJI_USER".pem
 # Browser certificate is not password-protected, ask users to change their password
