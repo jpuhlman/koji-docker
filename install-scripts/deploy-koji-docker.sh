@@ -483,5 +483,8 @@ fi
 
 #Add all the packages
 "$SCRIPT_DIR"/package-add.sh
-
+systemctl start watch-apps
+systemctl start watch-hosts
+cp "$SCRIPT_DIR"/user.list /etc/koji/
+systemctl start watch-users
 "$SCRIPT_DIR"/deploy-mash.sh

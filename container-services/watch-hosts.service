@@ -1,0 +1,10 @@
+[Unit]
+Description=Watch for new hosts added to koji hub and generate needed certs
+
+[Service]
+ExecStart=/usr/share/koji-docker/watch-hosts.sh
+Restart=always
+RestartSec=20s
+
+[Install]
+WantedBy=multi-user.target

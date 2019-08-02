@@ -1,0 +1,9 @@
+[Unit]
+Description=Watch for new users added to /etc/koji/user.list
+
+[Service]
+ExecStart=/usr/share/koji-docker/watch-users.sh
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
