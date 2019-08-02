@@ -21,6 +21,7 @@ if [ -e /etc/koji/user.list ] ; then
 		    popd
 	    fi
 	    mkdir -p "$COMMON_CONFIG"/users/$user
+	    chmod 755 "$COMMON_CONFIG"/users/$user
 	    cp -f "$KOJI_PKI_DIR"/koji_ca_cert.crt "$COMMON_CONFIG"/users/$user/clientca.crt
 	    cp -f "$KOJI_PKI_DIR"/koji_ca_cert.crt "$COMMON_CONFIG"/users/$user/serverca.crt
 	    cp -f "$KOJI_PKI_DIR"/$user.pem "$COMMON_CONFIG"/users/$user/client.crt

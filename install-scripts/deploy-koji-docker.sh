@@ -152,9 +152,6 @@ fi
 if [ ! -e "$KOJI_PKI_DIR"/certs/kojira.crt ] ; then
 	./gencert.sh kojira "/C=$COUNTRY_CODE/ST=$STATE/L=$LOCATION/O=$ORGANIZATION/OU=$ORG_UNIT/CN=kojira"
 fi
-if [ ! -e "$KOJI_PKI_DIR"/certs/user.crt ] ; then
-	./gencert.sh user "/C=$COUNTRY_CODE/ST=$STATE/L=$LOCATION/O=$ORGANIZATION/OU=$ORG_UNIT/CN=user"
-fi
 popd
 
 # Copy certificates into ~/.koji for kojiadmin
@@ -332,12 +329,6 @@ anon_retry = true
 EOF
 chown kojiadmin:kojiadmin "$ADMIN_KOJI_DIR"/config
 fi
-mkdir -p $COMMON_CONFIG/user
-chmod 755 $COMMON_CONFIG/user
-cp -f "$ADMIN_KOJI_DIR"/config $COMMON_CONFIG/user
-cp -f "$KOJI_PKI_DIR"/koji_ca_cert.crt "$COMMON_CONFIG"/user/clientca.crt
-cp -f "$KOJI_PKI_DIR"/koji_ca_cert.crt "$COMMON_CONFIG"/user/serverca.crt
-cp -f "$KOJI_PKI_DIR"/user.pem "$COMMON_CONFIG"/user/client.crt 
 
 if [ ! -e "$KOJI_DIR"/packages ] ; then
 ## KOJI APPLICATION HOSTING
@@ -486,5 +477,6 @@ fi
 systemctl start watch-apps
 systemctl start watch-hosts
 cp "$SCRIPT_DIR"/user.list /etc/koji/
+"$SCRIPT_DIR"/user-add.sh
 systemctl start watch-users
 "$SCRIPT_DIR"/deploy-mash.sh
