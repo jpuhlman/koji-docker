@@ -33,6 +33,7 @@ COPY container-services/koji-setup.service \
      container-services/watch*.service \
      /etc/systemd/system/
 RUN systemctl enable koji-setup
+RUN systemctl disable swupd-update
 RUN mkdir -p /etc/sudoers.d/
 RUN echo "kojiadmin  ALL=NOPASSWD: /usr/bin/hostenv.sh" | tee -a /etc/sudoers.d/visudo
 RUN echo "root:$(echo 'password' | openssl passwd -1 -stdin):18099::::::" >> /etc/shadow
