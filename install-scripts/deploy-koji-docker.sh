@@ -20,9 +20,9 @@ fi
 
 rm -f $COMMON_CONFIG/.done
 # INSTALL KOJI
-if [ -z "$(swupd bundle-list | grep koji)" ] ; then
-	swupd bundle-add koji
-fi
+#if [ -z "$(swupd bundle-list | grep koji)" ] ; then
+#	swupd bundle-add koji
+#fi
 systemctl stop postgresql httpd kojira || true
 ## SETTING UP SSL CERTIFICATES FOR AUTHENTICATION
 

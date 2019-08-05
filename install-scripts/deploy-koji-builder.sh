@@ -19,7 +19,7 @@ else
 fi
 
 # Install kojid
-swupd bundle-add koji
+#swupd bundle-add koji
 
 # Create mock folders and permissions
 mkdir -p /etc/mock/koji

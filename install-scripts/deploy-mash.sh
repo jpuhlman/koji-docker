@@ -7,7 +7,7 @@ SCRIPT_DIR="$(dirname "$(realpath "$0")")"
 source "$SCRIPT_DIR"/globals.sh
 source "$SCRIPT_DIR"/parameters.sh
 
-swupd bundle-add koji
+#swupd bundle-add koji
 
 mkdir -p "$MASH_DIR"
 chown -R kojiadmin:kojiadmin "$MASH_DIR"
