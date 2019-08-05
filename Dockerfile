@@ -37,4 +37,6 @@ RUN systemctl disable swupd-update
 RUN mkdir -p /etc/sudoers.d/
 RUN echo "kojiadmin  ALL=NOPASSWD: /usr/bin/hostenv.sh" | tee -a /etc/sudoers.d/visudo
 RUN echo "root:$(echo 'password' | openssl passwd -1 -stdin):18099::::::" >> /etc/shadow
+RUN sed -i /usr/lib/systemd/system/swupd-update.service -e "s,/usr/bin/swupd,/bin/echo,"
+RUN sed -i  /usr/lib/python2.7/site-packages/koji/daemon.py -e "s,maxload\ =\ 4.0,maxload\ =\ 8.0,"
 CMD [ "/sbin/init" ]

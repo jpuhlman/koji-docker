@@ -336,6 +336,10 @@ if [ ! -e "$KOJI_DIR"/packages ] ; then
 mkdir -p "$KOJI_DIR"/{packages,repos,work,scratch,repos-dist}
 chown -R "$HTTPD_USER":"$HTTPD_USER" "$KOJI_DIR"
 fi
+if [ ! -e "$KOJI_DIR"/hosts ] ; then
+	mkdir -p "$KOJI_DIR"/hosts/kojiadmin
+	cp -a "$ADMIN_KOJI_DIR"/* "$KOJI_DIR"/hosts/kojiadmin
+fi
 
 if [ ! -e /etc/httpd/conf.d/ssl.conf ] ; then
 ## Apache Configuration Files
