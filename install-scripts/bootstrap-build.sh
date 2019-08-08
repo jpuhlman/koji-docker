@@ -35,8 +35,11 @@ sudo -u kojiadmin koji add-tag --parent dist-"$TAG_NAME" --arches "$RPM_ARCH" di
 sudo -u kojiadmin koji add-target dist-"$TAG_NAME" dist-"$TAG_NAME"-build
 sudo -u kojiadmin koji add-group dist-"$TAG_NAME"-build build
 sudo -u kojiadmin koji add-group dist-"$TAG_NAME"-build srpm-build
-sudo -u kojiadmin koji add-group-pkg dist-"$TAG_NAME"-build build autoconf automake automake-dev binutils bzip2 clr-rpm-config coreutils diffutils gawk gcc gcc-dev gettext gettext-bin git glibc-dev glibc-locale glibc-utils grep gzip hostname libc6-dev libcap libtool libtool-dev linux-libc-headers m4 make netbase nss-altfiles patch pigz pkg-config pkg-config-dev rpm-build sed sed-doc shadow systemd-lib tar unzip which xz
-sudo -u kojiadmin koji add-group-pkg dist-"$TAG_NAME"-build srpm-build coreutils cpio curl-bin git glibc-utils grep gzip make pigz plzip rpm-build sed shadow tar unzip wget xz
+sudo -u kojiadmin koji add-group-pkg dist-"$TAG_NAME"-build build autoconf automake binutils bzip2 coreutils diffutils gawk gcc gettext git glibc-devel glibc-common glibc-utils grep gzip hostname libc6-dev libcap libtool kernel-headers m4 make setup nss-altfiles patch pigz pkgconfig rpm-build sed shadow-utils systemd-libs tar unzip which xz
+# clr-rpm-config
+
+sudo -u kojiadmin koji add-group-pkg dist-"$TAG_NAME"-build srpm-build coreutils cpio curl git glibc-utils grep gzip make rpm-build sed shadow-utils tar unzip wget xz
+# plzip
 if [[ -n "$EXTERNAL_REPO" ]]; then
 	sudo -u kojiadmin koji add-external-repo -t dist-"$TAG_NAME"-build dist-"$TAG_NAME"-external-repo "$EXTERNAL_REPO"
 fi
