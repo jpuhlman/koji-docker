@@ -20,7 +20,7 @@ fi
 if [ -z "$(git config --global user.jenkins)" ] ; then
 	git config --global user.name "$USER_NAME"
 fi
-PACKAGES="rpm librepo"
+PACKAGES="rpm librepo libsolv"
 mkdir -p $COPY_LOCATION/rpms/
 for package in $PACKAGES; do
     pushd $BUILD_LOCATION
