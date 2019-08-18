@@ -15,7 +15,6 @@ COPY  \
      install-scripts/gencert.sh \
      install-scripts/globals.sh \
      install-scripts/parameters.sh \
-     install-scripts/package-add.sh \
      install-scripts/deploy-mash.sh \
      install-scripts/mash.sh\
      install-scripts/watch-*.sh \
