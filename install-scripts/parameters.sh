@@ -35,16 +35,25 @@ export SRC_RPM_DIR=
 export BIN_RPM_DIR=
 export DEBUG_RPM_DIR=
 # Comment the following if supplying all RPMs as an upstream and not a downstream
-export EXTERNAL_REPO=http://vault.centos.org/7.5.1804/os/x86_64/
-
+export EXTERNAL_REPO="http://vault.centos.org/7.5.1804/os/x86_64/ https://mirror.umd.edu/fedora/epel/7/x86_64/" 
 ## POSTGRESQL DATABASE
 export POSTGRES_DIR=/srv/pgsql
 
 ## GIT REPOSITORIES
+
 export GIT_DIR=/srv/git
-export GIT_FQDN="gitcentos.mvista.com"
-export GIT_PATH=/centos/upstream/packages/*
-export GIT_GETSOURCES=":common:/chroot_tmpdir/scmroot/common/get_sources.sh"
+if [ -z "$GIT_FQND" ] ; then
+   export GIT_FQDN="gitcentos.mvista.com"
+fi
+if [ -z "$GIT_PATH" ] ; then
+   export GIT_PATH=/centos/upstream/packages/*
+fi
+if [ -z "$GIT_PATH" ] ; then
+	export GIT_GETSOURCES=":common:/chroot_tmpdir/scmroot/common/get_sources.sh"
+fi
+if [ -z "$KOJI_SCMS" ] ; then
+	KOJI_SCMS=$GIT_FQDN:$GIT_PATH$GIT_GETSOURCES
+fi
 export IS_ANONYMOUS_GIT_NEEDED=false
 export GITOLITE_PUB_KEY=''
 

@@ -1,9 +1,0 @@
-[Unit]
-Description=Watch for new apps added to /etc/koji/app.list
-
-[Service]
-ExecStart=/usr/share/koji-docker/watch-apps.sh
-Restart=always
-
-[Install]
-WantedBy=multi-user.target

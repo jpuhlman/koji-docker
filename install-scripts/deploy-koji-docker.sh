@@ -25,6 +25,9 @@ rm -f $COMMON_CONFIG/.done
 #fi
 systemctl stop postgresql httpd kojira || true
 ## SETTING UP SSL CERTIFICATES FOR AUTHENTICATION
+if [ -n "$TZ" ] ; then
+	timedatectl set-timezone $TZ
+fi
 
 mkdir -p $COMMON_CONFIG/$(echo "$KOJI_PKI_DIR" | sed s,/etc/,,)
 mkdir -p $(dirname $KOJI_PKI_DIR)
@@ -422,8 +425,9 @@ popd
 fi
 
 if [[ "$KOJI_SLAVE_FQDN" = "$KOJI_MASTER_FQDN" ]]; then
-	"$SCRIPT_DIR"/deploy-koji-builder.sh
+       "$SCRIPT_DIR"/deploy-koji-builder.sh
 fi
+
 mkdir -p $COMMON_CONFIG/koji
 if [ ! -L /etc/koji ] ; then
 	  ln -s $COMMON_CONFIG/koji /etc/koji
@@ -461,9 +465,6 @@ EOF
 fi
 
 systemctl start kojira
-if ! ls $KOJI_DIR/repos/*/1 -d 2>/dev/null >/dev/null ; then
-	"$SCRIPT_DIR"/bootstrap-build.sh
-fi
 
 touch $COMMON_CONFIG/.done
 if [ ! -e "$ECTKOJI"/app.list ] ; then
@@ -477,8 +478,6 @@ if [ ! -e "$ECTKOJI"/globals.sh ] ; then
 fi
 
 #Add all the packages
-"$SCRIPT_DIR"/package-add.sh
-systemctl start watch-apps
 systemctl start watch-hosts
 cp "$SCRIPT_DIR"/user.list /etc/koji/
 "$SCRIPT_DIR"/user-add.sh
