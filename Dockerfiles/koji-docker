@@ -9,7 +9,7 @@ RUN rpm -ihv --nodeps --force /tmp/rpms/*.rpm
 RUN rm -rf  /tmp/rpms/
 RUN swupd bundle-add diffutils tzdata
 RUN mkdir -p /usr/share/koji-docker
-COPY install-scripts/bootstrap-build.sh  \
+COPY  \
      install-scripts/deploy-koji-builder.sh \
      install-scripts/deploy-koji-docker.sh \
      install-scripts/gencert.sh \
