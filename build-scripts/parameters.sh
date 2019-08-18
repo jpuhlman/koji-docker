@@ -1,6 +1,6 @@
 #!/bin/bash
 
-
+REGISTRY=jptest01.mvista.com:5001
 KOJI_CONTAINER_NAME=koji-test
 KOJI_CONTAINER_DOCKERFILE="Dockerfiles/koji-docker"
 
@@ -8,3 +8,7 @@ KOJIBUILDER_CONTAINER_NAME=koji-builder
 KOJIBUILDER_CONTAINER_DOCKERFILE="Dockerfiles/builder"
 
 CONTAINER_VERSIONS=$(date +%y%m%d)
+CONTAINERS="$KOJI_CONTAINER_NAME \
+	    $KOJIBUILDER_CONTAINER_NAME \
+	    "
+
