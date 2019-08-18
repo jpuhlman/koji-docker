@@ -16,6 +16,6 @@ Before=httpd.target postgresql.target kojira.target kojid.target
 [Service]
 Type=oneshot
 ExecStart=/usr/share/koji-docker/deploy-koji-docker.sh
-
+ExecStopPost=/bin/touch /config/.failed
 [Install]
 WantedBy=multi-user.target
