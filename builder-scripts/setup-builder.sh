@@ -17,6 +17,30 @@ fi
 echo "Koji Hub server           : $KOJI_HOST"
 echo "Koji builder(this machine): $KOJI_BUILDER"
 
+if [ -z "$GIT_FQND" ] ; then
+   export GIT_FQDN=""
+fi
+if [ -z "$GIT_PATH" ] ; then
+   export GIT_PATH=""
+fi
+if [ -z "$GIT_GETSOURCES" ] ; then
+        export GIT_GETSOURCES=""
+fi
+if [ -z "$KOJI_SCMS" ] ; then
+        KOJI_SCMS=$GIT_FQDN:$GIT_PATH$GIT_GETSOURCES
+fi
+if [ "$KOJI_SCMS" = ":" ] ; then
+   echo "You must define what the SCMS the koji builder can use."
+   echo "You can define this with KOJI_SCMS by defining the whole string."
+   echo "You can also define it with:"
+   echo "GIT_FQND - host of your git server"
+   echo "GIT_PATH - relitve path to your packages"
+   echo "GIT_GETSOURCES - how to get sources"
+   echo "This sets the SCMS to \$GIT_FQDN:\$GIT_PATH\$GIT_GETSOURCES"
+   echo "These values should be passed to the container via --env"
+   exit 1 
+fi
+
 mkdir -p .koji
 pushd .koji
 for config in $CONFIGFILES; do
@@ -60,7 +84,6 @@ while true; do
         fi
 done
 
-
 cat > /etc/kojid/kojid.conf <<- EOF
 [kojid]
 sleeptime=5
@@ -75,7 +98,7 @@ user=$KOJI_BUILDER
 server=https://$KOJI_HOST/kojihub
 topurl=https://$KOJI_HOST/kojifiles
 use_createrepo_c=True
-allowed_scms=gitcentos.mvista.com:/centos/upstream/packages/*:common:/chroot_tmpdir/scmroot/common/get_sources.sh
+allowed_scms=$KOJI_SCMS
 cert = /etc/kojid/client.ca
 ca = /etc/kojid/serverca.crt
 serverca = /etc/kojid/serverca.crt
