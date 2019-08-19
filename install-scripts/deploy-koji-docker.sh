@@ -407,26 +407,25 @@ sudo -u kojiadmin koji moshimoshi
 
 ## KOJI DAEMON - BUILDER
 # Add the host entry for the koji builder to the database
-if [ -z "$(sudo -u kojiadmin koji list-hosts | grep -v ^Hostname | grep "$KOJI_SLAVE_FQDN")" ] ; then
-	sudo -u kojiadmin koji add-host "$KOJI_SLAVE_FQDN" "$RPM_ARCH"
+if [ -z "$(sudo -u kojiadmin koji list-hosts | grep -v ^Hostname | grep "$KOJI_MASTER_FQDN")" ] ; then
+	sudo -u kojiadmin koji add-host "$KOJI_MASTER_FQDN" "$RPM_ARCH"
 fi
 
 # Add the host to the createrepo channel
-sudo -u kojiadmin koji add-host-to-channel "$KOJI_SLAVE_FQDN" createrepo || true
+sudo -u kojiadmin koji add-host-to-channel "$KOJI_MASTER_FQDN" createrepo || true
 
 # A note on capacity
-sudo -u kojiadmin koji edit-host --capacity="$KOJID_CAPACITY" "$KOJI_SLAVE_FQDN"
+sudo -u kojiadmin koji edit-host --capacity="$KOJID_CAPACITY" "$KOJI_MASTER_FQDN"
 
 # Generate certificates
-if [ ! -e /etc/pki/koji/certs/"$KOJI_SLAVE_FQDN".crt ] ; then 
+if [ ! -e /etc/pki/koji/certs/"$KOJI_MASTER_FQDN".crt ] ; then 
 pushd "$KOJI_PKI_DIR"
-./gencert.sh "$KOJI_SLAVE_FQDN" "/C=$COUNTRY_CODE/ST=$STATE/L=$LOCATION/O=$ORGANIZATION/CN=$KOJI_SLAVE_FQDN"
+./gencert.sh "$KOJI_MASTER_FQDN" "/C=$COUNTRY_CODE/ST=$STATE/L=$LOCATION/O=$ORGANIZATION/CN=$KOJI_MASTER_FQDN"
 popd
 fi
 
-if [[ "$KOJI_SLAVE_FQDN" = "$KOJI_MASTER_FQDN" ]]; then
-       "$SCRIPT_DIR"/deploy-koji-builder.sh
-fi
+#Setup local builder
+"$SCRIPT_DIR"/deploy-koji-builder.sh
 
 mkdir -p $COMMON_CONFIG/koji
 if [ ! -L /etc/koji ] ; then

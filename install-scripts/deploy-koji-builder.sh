@@ -33,11 +33,7 @@ fi
 usermod -G mock kojibuilder
 
 # Kojid Configuration Files
-if [[ "$KOJI_SLAVE_FQDN" = "$KOJI_MASTER_FQDN" ]]; then
-	KOJI_TOP_DIR="$KOJI_DIR"
-else
-	KOJI_TOP_DIR="$KOJI_MOUNT_DIR"
-fi
+KOJI_TOP_DIR="$KOJI_DIR"
 mkdir -p /config/kojid
 if [ ! -L /etc/kojid ] ; then
 	ln -s /config/kojid /etc/kojid
@@ -52,12 +48,12 @@ workdir=/tmp/koji
 mockdir=/var/lib/mock
 mockuser=kojibuilder
 mockhost=generic-linux-gnu
-user=$KOJI_SLAVE_FQDN
+user=$KOJI_MASTER_FQDN
 server=$KOJI_URL/kojihub
 topurl=$KOJI_URL/kojifiles
 use_createrepo_c=True
 allowed_scms=$KOJI_SCMS
-cert = $KOJI_PKI_DIR/$KOJI_SLAVE_FQDN.pem
+cert = $KOJI_PKI_DIR/$KOJI_MASTER_FQDN.pem
 ca = $KOJI_PKI_DIR/koji_ca_cert.crt
 serverca = $KOJI_PKI_DIR/koji_ca_cert.crt
 EOF

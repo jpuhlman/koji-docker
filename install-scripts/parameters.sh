@@ -18,24 +18,40 @@ if [ -z "$KOJI_MASTER_FQDN" ] ; then
 	exit 1
 fi
 export KOJI_URL=https://"$KOJI_MASTER_FQDN"
-export KOJI_MOUNT_DIR=/mnt/koji
-export KOJI_SLAVE_FQDN="$KOJI_MASTER_FQDN"
 export KOJID_CAPACITY=16
 export TAG_NAME=centos-updates-mv
 export DISTRO_NAME="centos-updates"
 # Use for koji SSL certificates
-export COUNTRY_CODE='US'
-export STATE='California'
-export LOCATION='Santa Clara'
-export ORGANIZATION='Montavista'
-export ORG_UNIT='MV'
+if [ -z "$COUNTRY_CODE" ] ; then
+	export COUNTRY_CODE='US'
+else
+	export COUNTRY_CODE
+fi
+if [ -z "$STATE" ] ; then
+	export STATE='SomeState'
+else
+	export STATE
+fi
+if [ -z "$LOCATION" ] ; then
+	export LOCATION='SomeCity'
+else
+	export LOCATION
+fi
+if [ -z "$ORGANIZATION" ] ; then
+	export ORGANIZATION='SomeCompany'
+else
+	export ORGANIZATION
+fi
+if [ -z "$ORG_UNIT" ] ; then
+	export ORG_UNIT='devel'
+else
+	export ORG_UNIT
+fi
+
 # Use for importing existing RPMs
-export RPM_ARCH='x86_64'
-export SRC_RPM_DIR=
-export BIN_RPM_DIR=
-export DEBUG_RPM_DIR=
-# Comment the following if supplying all RPMs as an upstream and not a downstream
-export EXTERNAL_REPO="http://vault.centos.org/7.5.1804/os/x86_64/ https://mirror.umd.edu/fedora/epel/7/x86_64/" 
+if [ -z "$RPM_ARCH" ] ; then
+	export RPM_ARCH='x86_64'
+fi
 ## POSTGRESQL DATABASE
 export POSTGRES_DIR=/srv/pgsql
 

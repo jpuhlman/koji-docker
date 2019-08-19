@@ -10,4 +10,6 @@ containers: rpms
 
 rpms: 
 	$(TOPDIR)/build-scripts/build-rpm.sh
+push:
+	$(TOPDIR)/build-scripts/push-containers.sh
 
