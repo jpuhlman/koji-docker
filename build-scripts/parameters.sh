@@ -1,7 +1,7 @@
 #!/bin/bash
 
 REGISTRY=jptest01.mvista.com:5001
-KOJI_CONTAINER_NAME=koji-test
+KOJI_CONTAINER_NAME=koji-docker
 KOJI_CONTAINER_DOCKERFILE="Dockerfiles/koji-docker"
 
 KOJIBUILDER_CONTAINER_NAME=koji-builder

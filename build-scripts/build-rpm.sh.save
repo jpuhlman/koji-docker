@@ -1,6 +1,6 @@
 #!/bin/bash -x
-set -e
-MV_CUSTOM_RPM=git://gitcentos.mvista.com/centos/upstream/updated-clearlinux-pkgs
+
+MV_CUSTOM_RPM=git://gitcentos.mvista.com/centos/upstream/utils
 USER_EMAIL="jenkins@mvista.com"
 USER_NAME="jenkins"
 BUILD_LOCATION=`pwd`/rpm-build
@@ -20,7 +20,7 @@ fi
 if [ -z "$(git config --global user.jenkins)" ] ; then
 	git config --global user.name "$USER_NAME"
 fi
-PACKAGES="rpm librepo libsolv libdnf dnf libmodulemd createrepo_c"
+PACKAGES="rpm librepo createrepo deltarpm koji createrepo_c libmodulemd libsolv libdnf"
 mkdir -p $COPY_LOCATION/rpms/
 for package in $PACKAGES; do
     pushd $BUILD_LOCATION
@@ -30,8 +30,6 @@ for package in $PACKAGES; do
 	pushd packages/$package
 		if [ ! -d rpms -o -z "$(ls rpms/*.rpm)" ] ; then
 			make build
-			make repoenable
-			make repoadd
 		fi
 		RPMSDIR=$(readlink -f rpms)
 	popd
