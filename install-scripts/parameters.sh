@@ -19,8 +19,16 @@ if [ -z "$KOJI_MASTER_FQDN" ] ; then
 fi
 export KOJI_URL=https://"$KOJI_MASTER_FQDN"
 export KOJID_CAPACITY=16
-export TAG_NAME=centos-updates-mv
-export DISTRO_NAME="centos-updates"
+if [ -z "$TAG_NAME" ] ; then
+	export TAG_NAME=centos-updates-mv
+else
+	export TAG_NAME
+fi
+if [ -z "$DISTRO_NAME" ] ; then
+	export DISTRO_NAME="centos-updates"
+else
+	export DISTRO_NAME
+fi
 # Use for koji SSL certificates
 if [ -z "$COUNTRY_CODE" ] ; then
 	export COUNTRY_CODE='US'
