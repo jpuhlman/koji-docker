@@ -1,12 +1,4 @@
-FROM clearlinux:latest
-ENV container docker
-RUN swupd bundle-add sudo koji lua-basic inotify-tools diffutils tzdata
-STOPSIGNAL SIGRTMIN+3
-RUN mkdir -p /tmp/rpms/
-RUN echo "If this next step fails, run ./build-scripts/build-rpm.sh"
-COPY rpms/*.rpm /tmp/rpms/
-RUN rpm -ihv --nodeps --force /tmp/rpms/*.rpm
-RUN rm -rf  /tmp/rpms/
+FROM jpuhlman/koji-base-clear:latest 
 RUN mkdir -p /usr/share/koji-docker
 COPY  \
      install-scripts/deploy-koji-builder.sh \
