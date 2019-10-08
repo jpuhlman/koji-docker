@@ -39,7 +39,7 @@ if [ ! -L /etc/kojid ] ; then
 	ln -s /config/kojid /etc/kojid
 fi
 if [ ! -e /etc/kojid/kojid.conf ] ; then
-cat > /etc/kojid/kojid.conf <<- EOF
+    cat > /etc/kojid/kojid.conf <<- EOF
 [kojid]
 sleeptime=5
 maxjobs=16
@@ -57,8 +57,13 @@ cert = $KOJI_PKI_DIR/$KOJI_MASTER_FQDN.pem
 ca = $KOJI_PKI_DIR/koji_ca_cert.crt
 serverca = $KOJI_PKI_DIR/koji_ca_cert.crt
 EOF
+    if [ -n "$KOJI_PACKAGER" ] ; then
+	    echo "packager = $KOJI_PACKAGER" >> /etc/kojid/kojid.conf
+    fi
+    if [ -n "$KOJI_VENDOR" ] ; then
+    	echo "vendor = $KOJI_VENDOR" >> /etc/kojid/kojid.conf
+    fi
 fi
-
 if env | grep -q proxy; then
 	echo "yum_proxy = $https_proxy" >> /etc/kojid/kojid.conf
 	mkdir -p /etc/systemd/system/kojid.service.d
