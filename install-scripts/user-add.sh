@@ -20,6 +20,7 @@ if [ -e /etc/koji/user.list ] ; then
 		      ./gencert.sh $user "/C=$COUNTRY_CODE/ST=$STATE/L=$LOCATION/O=$ORGANIZATION/OU=$ORG_UNIT/CN=$user"
 		    popd
 	    fi
+        sudo -u kojiadmin koji add-user $user
 	    mkdir -p "$COMMON_CONFIG"/users/$user
 	    chmod 755 "$COMMON_CONFIG"/users/$user
 	    cp -f "$KOJI_PKI_DIR"/koji_ca_cert.crt "$COMMON_CONFIG"/users/$user/clientca.crt
