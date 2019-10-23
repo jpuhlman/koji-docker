@@ -82,12 +82,12 @@ mkdir -p /etc/ca-certs/trusted
 
 while true; do
         if clrtrust generate; then
+                break
+        fi
 		pushd /etc/ca-certs/trusted
 		        rm serverca.crt
     			curl -O $CONFIG_URL/serverca.crt
 		popd
-                break
-        fi
 done
 
 cat > /etc/kojid/kojid.conf <<- EOF
