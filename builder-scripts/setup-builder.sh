@@ -67,6 +67,11 @@ if [ ! -e /etc/kojid/client.ca ] ; then
    popd
 fi
 
+while ! curl -O $CONFIG_URL/serverca.crt ; do
+      echo waiting for client certifcates from server
+      sleep 10
+done
+
 if [ ! -e /etc/kojid/serverca.crt ] ; then
    pushd /etc/kojid/
      curl -O $CONFIG_URL/serverca.crt 
@@ -74,12 +79,13 @@ if [ ! -e /etc/kojid/serverca.crt ] ; then
 fi 
 
 mkdir -p /etc/ca-certs/trusted
-pushd /etc/ca-certs/trusted
-    curl -O $CONFIG_URL/serverca.crt
-popd
 
 while true; do
         if clrtrust generate; then
+		pushd /etc/ca-certs/trusted
+		        rm serverca.crt
+    			curl -O $CONFIG_URL/serverca.crt
+		popd
                 break
         fi
 done
