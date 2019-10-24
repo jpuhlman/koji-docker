@@ -13,7 +13,7 @@ else
 fi
 if [ -n "$(cat index.txt)" ] ; then
 	lastIndex=$(cat index.txt | while read A B C D; do echo $C; done | tail -n 1)
-	NewSerial=$(($lastIndex + 1))
+	NewSerial=$((10#$lastIndex + 1))
 	if [ $NewSerial -lt "10" ] ; then
 		NewSerial="0$NewSerial"
 	fi
