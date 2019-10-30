@@ -39,7 +39,7 @@ if [[ "$MASH_BUILD_NUM" -eq "$CURRENT_KOJI_BUILD_NUM" ]]; then
 	NEWBUILD=$(ls $DISTRO_DIR | sort -n | tail -n 1)
 	KOJI_BUILD_NUM="$(basename "$(realpath "$DISTRO_DIR"/latest/)")"
 	if [ "$NEWBUILD" -ne "$KOJI_BUILD_NUM" ] ; then
-	   inotifywait -e modify $DISTRO_DIR
+	   inotifywait -t 30 -e modify $DISTRO_DIR
 	   KOJI_BUILD_NUM="$(basename "$(realpath "$DISTRO_DIR"/latest/)")"
 	fi
 fi
