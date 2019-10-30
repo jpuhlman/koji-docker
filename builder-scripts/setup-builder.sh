@@ -79,13 +79,17 @@ if [ ! -e /etc/kojid/serverca.crt ] ; then
 fi 
 
 mkdir -p /etc/ca-certs/trusted
+pushd /etc/ca-certs/trusted
+		rm -f serverca.crt
+    	curl -O $CONFIG_URL/serverca.crt
+popd
 
 while true; do
         if clrtrust generate; then
                 break
         fi
 		pushd /etc/ca-certs/trusted
-		        rm serverca.crt
+		        rm -f serverca.crt
     			curl -O $CONFIG_URL/serverca.crt
 		popd
 done
