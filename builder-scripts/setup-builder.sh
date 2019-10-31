@@ -124,5 +124,8 @@ fi
 usermod -G mock kojibuilder
 
 export NSS_STRICT_NOFORK=DISABLED
-/usr/bin/kojid --fg --force-lock --verbose
-
+if [ "$$" = "1" ] ; then
+exec /usr/bin/kojid --fg --force-lock --verbose
+else
+     /usr/bin/kojid --fg --force-lock --verbose
+fi
