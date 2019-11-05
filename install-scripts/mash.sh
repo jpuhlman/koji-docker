@@ -18,7 +18,6 @@ MASH_DIR="${MASH_DIR:-/srv/mash}"
 MASH_TRACKER_FILE="$MASH_DIR"/latest-mash-build
 MASH_TRACKER_DIR="$MASH_DIR"/latest
 MASH_DIR_OLD="$MASH_TRACKER_DIR".old
-MASH_DIR_NEW="$MASH_TRACKER_DIR".new
 
 write_packages_file() {
 	local PKG_DIR="$1"
@@ -46,6 +45,7 @@ fi
 if [[ "$MASH_BUILD_NUM" -ne "$KOJI_BUILD_NUM" ]]; then
 	COMPS_FILE="$(mktemp)"
 	koji show-groups --comps dist-"$TAG_NAME"-build > "$COMPS_FILE"
+    MASH_DIR_NEW="$MASH_DIR/$KOJI_BUILD_NUM"
 	rm -rf "$MASH_DIR_NEW"
 	mkdir -p "$MASH_DIR_NEW"
 	mash --outputdir="$MASH_DIR_NEW" --compsfile="$COMPS_FILE" "$DISTRO_NAME"
@@ -55,11 +55,10 @@ if [[ "$MASH_BUILD_NUM" -ne "$KOJI_BUILD_NUM" ]]; then
 	write_packages_file "$MASH_DIR_NEW"/"$DISTRO_NAME"/"$BUILD_ARCH"/debug "$MASH_DIR_NEW"/"$DISTRO_NAME"/"$BUILD_ARCH"/packages-debug
 	write_packages_file "$MASH_DIR_NEW"/"$DISTRO_NAME"/source/SRPMS "$MASH_DIR_NEW"/"$DISTRO_NAME"/source/packages-SRPMS
 
-	if [[ -e "$MASH_TRACKER_DIR" ]]; then
-		mv "$MASH_TRACKER_DIR" "$MASH_DIR_OLD"
+	if [[ -L "$MASH_TRACKER_DIR" ]]; then
+        rm -f "$MASH_TRAKER_DIR"
+        ln -s $KOJI_BUILD_NUM $MASH_TRAKER_DIR
 	fi
-	mv "$MASH_DIR_NEW" "$MASH_TRACKER_DIR"
-	rm -rf "$MASH_DIR_OLD"
 
 	echo "$KOJI_BUILD_NUM" > "$MASH_TRACKER_FILE"
 fi
