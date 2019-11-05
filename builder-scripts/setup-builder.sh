@@ -64,6 +64,7 @@ mkdir -p /etc/kojid
 if [ ! -e /etc/kojid/client.ca ] ; then
    pushd /etc/kojid/
      curl -O $CONFIG_URL/client.ca 
+     cat client.ca
    popd
 fi
 
@@ -74,7 +75,8 @@ done
 
 if [ ! -e /etc/kojid/serverca.crt ] ; then
    pushd /etc/kojid/
-     curl -O $CONFIG_URL/serverca.crt 
+     curl -O $CONFIG_URL/serverca.crt
+     cat serverca.crt
    popd
 fi 
 
