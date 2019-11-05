@@ -63,7 +63,16 @@ done
 mkdir -p /etc/kojid
 if [ ! -e /etc/kojid/client.ca ] ; then
    pushd /etc/kojid/
-     curl -O $CONFIG_URL/client.ca 
+     while true; do
+        curl -O $CONFIG_URL/client.ca 
+        if [ -n "$(cat client.ca | grep 'END RSA PRIVATE KEY')" ] ; then
+           break
+        else
+           echo Not a valid client certificate, remove and wait.
+           rm -f client.ca
+        fi
+        sleep 10
+     done
      cat client.ca
    popd
 fi
@@ -75,7 +84,16 @@ done
 
 if [ ! -e /etc/kojid/serverca.crt ] ; then
    pushd /etc/kojid/
-     curl -O $CONFIG_URL/serverca.crt
+     while true; do
+        curl -O $CONFIG_URL/serverca.crt
+        if [ -n "$(cat serverca.crt | grep 'END CERTIFICATE')" ] ; then
+           break
+        else
+           echo Not a valid server certificate, remove and wait.
+           rm -f serverca.crt
+        fi
+        sleep 10
+     done
      cat serverca.crt
    popd
 fi 
