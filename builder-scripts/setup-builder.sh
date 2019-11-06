@@ -6,7 +6,7 @@ rm $TMPFILE
 set -ex
 function finish {
  echo -en "\n## Caught EXIT; Clean up kojid and Exit \n"
- ps aux | grep kojid | while read USER PID REST; do kill -s TERM $PID; done
+ ps aux | grep kojid | grep -v grep | while read USER PID REST; do kill -s TERM $PID; done
  wait %1
  exit 0
 }
