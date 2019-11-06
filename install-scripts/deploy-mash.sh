@@ -17,8 +17,12 @@ ln -sf "$MASH_DIR" "$MASH_LINK"
 chown -h kojiadmin:kojiadmin "$MASH_LINK"
 usermod -a -G kojiadmin "$HTTPD_USER"
 # Required because Clear is stateless, and mash is run as a non-elevated user
-mkdir -p /var/cache/mash
-chown -R kojiadmin:kojiadmin /var/cache/mash
+mkdir -p /srv/mash-cache
+chown -R kojiadmin:kojiadmin /srv/mash-cache
+if [ ! -L /var/cache/mash -o ! -e /var/cache/mash ] ; then
+   ln -s /srv/mash-cache /var/cache/mash
+   chown kojiadmin:kojiadmin /var/cache/mash
+fi
 rpm --initdb
 
 mkdir -p /config/mash
