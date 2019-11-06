@@ -4,6 +4,13 @@ TMPFILE=$(mktemp)
 source $TMPFILE
 rm $TMPFILE
 set -ex
+function finish {
+ echo -en "\n## Caught EXIT; Clean up kojid and Exit \n"
+ ps aux | grep kojid | while read USER PID REST; do kill -s TERM $PID; done
+ exit $?
+}
+
+trap finish EXIT
 CONFIGFILES="clientca.crt  client.crt  config  serverca.crt"
 KOJI_MOUNT=/mnt/koji
 PATH_TO_CONFIGS=hosts/
