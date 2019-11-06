@@ -7,7 +7,8 @@ set -ex
 function finish {
  echo -en "\n## Caught EXIT; Clean up kojid and Exit \n"
  ps aux | grep kojid | while read USER PID REST; do kill -s TERM $PID; done
- exit $?
+ wait %1
+ exit 0
 }
 
 trap finish EXIT
