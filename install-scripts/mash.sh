@@ -55,7 +55,7 @@ if [[ "$MASH_BUILD_NUM" -ne "$KOJI_BUILD_NUM" ]]; then
 	write_packages_file "$MASH_DIR_NEW"/"$DISTRO_NAME"/"$BUILD_ARCH"/debug "$MASH_DIR_NEW"/"$DISTRO_NAME"/"$BUILD_ARCH"/packages-debug
 	write_packages_file "$MASH_DIR_NEW"/"$DISTRO_NAME"/source/SRPMS "$MASH_DIR_NEW"/"$DISTRO_NAME"/source/packages-SRPMS
 
-	if [[ -L "$MASH_TRACKER_DIR" -o ! -e $MASH_TRACKER_DIR ]]; then
+	if [ -L "$MASH_TRACKER_DIR" -o ! -e $MASH_TRACKER_DIR ] ; then
         rm -f "$MASH_TRACKER_DIR"
         ln -s $KOJI_BUILD_NUM $MASH_TRACKER_DIR
 	fi
