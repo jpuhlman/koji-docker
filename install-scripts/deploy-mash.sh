@@ -19,6 +19,9 @@ usermod -a -G kojiadmin "$HTTPD_USER"
 # Required because Clear is stateless, and mash is run as a non-elevated user
 mkdir -p /srv/mash-cache
 chown -R kojiadmin:kojiadmin /srv/mash-cache
+chown root:kojiadmin /etc/systemd/system
+chmod 775 /etc/systemd/system
+
 if [ ! -L /var/cache/mash -o ! -e /var/cache/mash ] ; then
    ln -s /srv/mash-cache /var/cache/mash
    chown kojiadmin:kojiadmin /var/cache/mash
@@ -26,6 +29,7 @@ fi
 rpm --initdb
 
 mkdir -p /config/mash
+chown kojiadmin:kojiadmin /config/mash 
 if [ ! -L /etc/mash ] ; then
 	ln -s /config/mash /etc/mash
 fi
@@ -39,24 +43,10 @@ use_sqlite = True
 use_repoview = False
 EOF
 fi
-if [ ! -e /etc/mash/"$DISTRO_NAME".mash ] ; then
-cat > /etc/mash/"$DISTRO_NAME".mash <<- EOF
-[$DISTRO_NAME]
-rpm_path = %(arch)s/os/Packages
-repodata_path = %(arch)s/os/
-source_path = source/SRPMS
-debuginfo = True
-multilib = False
-multilib_method = devel
-tag = dist-$TAG_NAME
-inherit = True
-strict_keys = False
-arches = $RPM_ARCH
-EOF
-fi
 
 mkdir -p "$MASH_SCRIPT_DIR"
 cp -f "$SCRIPT_DIR"/mash.sh "$MASH_SCRIPT_DIR"
+cp -f "$SCRIPT_DIR"/gen-mash.sh "$MASH_SCRIPT_DIR"
 
 mkdir -p /etc/systemd/system
 cat > /etc/systemd/system/mash.service <<- EOF
@@ -66,7 +56,7 @@ Description=Mash script to loop local repository creation for local image builds
 [Service]
 User=kojiadmin
 Group=kojiadmin
-ExecStart=$MASH_SCRIPT_DIR/mash.sh
+ExecStart=$MASH_SCRIPT_DIR/gen-mash.sh
 Restart=always
 RestartSec=10s
 

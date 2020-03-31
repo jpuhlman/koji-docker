@@ -8,6 +8,7 @@ COPY  \
      install-scripts/parameters.sh \
      install-scripts/deploy-mash.sh \
      install-scripts/mash.sh\
+     install-scripts/gen-mash.sh\
      install-scripts/watch-*.sh \
      install-scripts/add-hosts.sh \
      install-scripts/user-add.sh \
@@ -28,6 +29,8 @@ RUN systemctl enable koji-setup
 RUN systemctl disable swupd-update
 RUN mkdir -p /etc/sudoers.d/
 RUN echo "kojiadmin  ALL=NOPASSWD: /usr/bin/hostenv.sh" | tee -a /etc/sudoers.d/visudo
+RUN echo "kojiadmin  ALL=NOPASSWD: /usr/bin/systemctl" | tee -a /etc/sudoers.d/visudo
+RUN echo "Defaults!/usr/bin/systemctl !requiretty" | tee -a /etc/sudoers.d/visudo
 RUN echo "root:$(echo 'password' | openssl passwd -1 -stdin):18099::::::" >> /etc/shadow
 RUN sed -i /usr/lib/systemd/system/swupd-update.service -e "s,/usr/bin/swupd,/bin/echo,"
 RUN sed -i  /usr/lib/python2.7/site-packages/koji/daemon.py -e "s,maxload\ =\ 4.0,maxload\ =\ 8.0,"
