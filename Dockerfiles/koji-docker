@@ -17,7 +17,7 @@ COPY  \
      /usr/share/koji-docker/
 RUN mkdir -p /usr/sbin/
 COPY install-scripts/hostenv.sh /usr/sbin/
-RUN chmod 755 /usr/bin/hostenv.sh
+RUN chmod 755 /usr/sbin/hostenv.sh
 RUN chmod 755 /usr/share/koji-docker/*.sh
 RUN mkdir -p /etc/mock
 COPY configs/mock/* /etc/mock/
