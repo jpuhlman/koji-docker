@@ -6,6 +6,8 @@ for each in (open("/proc/1/environ").read().split('\x00')):
         var = each.split("=")[0]
         val = each.split("=")[1]
         val = val.replace("@"," ")
+        if var == "HOME":
+           continue
         print("export %s='%s'" % (var,val))
     else:
         print (each)
