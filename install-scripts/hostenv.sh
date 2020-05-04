@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 
 
 for each in (open("/proc/1/environ").read().split('\x00')):

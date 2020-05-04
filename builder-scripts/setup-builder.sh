@@ -10,7 +10,7 @@ function finish {
  wait %1
  exit 0
 }
-
+cd /root
 trap finish EXIT
 CONFIGFILES="clientca.crt  client.crt  config  serverca.crt"
 KOJI_MOUNT=/mnt/koji
@@ -55,7 +55,6 @@ for config in $CONFIGFILES; do
     curl -q -O http://$KOJI_HOST/kojifiles/hosts/kojiadmin/$config
 done
 popd
-koji moshimoshi
 
 if [ -z "$(koji list-hosts | grep $KOJI_BUILDER)" ] ; then
    ARCH="$(koji list-hosts | grep -v Hostname | while read A B C D E F; do echo $E; done | sort -u)"
@@ -113,10 +112,10 @@ pushd /etc/ca-certs/trusted
 popd
 
 while true; do
-        if clrtrust generate; then
+        if update-ca-trust; then
                 break
         fi
-		pushd /etc/ca-certs/trusted
+		pushd /etc/pki/ca-trust/source/anchors/
 		        rm -f serverca.crt
     			curl -O $CONFIG_URL/serverca.crt
 		popd
@@ -152,5 +151,5 @@ fi
 usermod -G mock kojibuilder
 
 export NSS_STRICT_NOFORK=DISABLED
-/usr/bin/kojid --fg --force-lock --verbose &
+/usr/sbin/kojid --fg --force-lock --verbose &
 while true; do sleep 10; done
