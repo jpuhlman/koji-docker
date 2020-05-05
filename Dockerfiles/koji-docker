@@ -1,4 +1,4 @@
-FROM jpuhman/koji-base-clear
+FROM jpuhlman/koji-base-clear
 RUN mkdir -p /usr/share/koji-docker
 COPY  \
      install-scripts/deploy-koji-builder.sh \
