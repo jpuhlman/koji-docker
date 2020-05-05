@@ -1,6 +1,7 @@
-FROM clearlinux:latest
+FROM jpuhlman/koji-base-clear:191105
+ENV TEST foo
 ENV container docker
-RUN swupd bundle-add sudo koji lua-basic inotify-tools diffutils tzdata
+RUN swupd bundle-add sudo koji lua-basic inotify-tools diffutils tzdata patch
 RUN swupd clean
 STOPSIGNAL SIGRTMIN+3
 RUN mkdir -p /tmp/rpms/
