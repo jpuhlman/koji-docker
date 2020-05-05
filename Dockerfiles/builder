@@ -14,5 +14,5 @@ COPY configs/koji.conf /etc/
 RUN chmod 755 /usr/bin/hostenv.sh
 RUN chmod 755 /usr/sbin/hostenv.sh
 RUN chmod 755 /usr/share/koji-docker/*.sh
-#RUN sed -i  /usr/lib/python2.7/site-packages/koji/daemon.py -e 's,maxload\ =\ 4.0,maxload\ =\ 8.0,'
+RUN sed -i  /usr/lib/python3.6/site-packages/koji/daemon.py -e 's,maxload\ =\ 4.0,maxload\ =\ 8.0,'
 CMD [ "/usr/share/koji-docker/setup-builder.sh" ]
