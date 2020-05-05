@@ -1,0 +1,31 @@
+
+Binary files koji-docker-not-working/bin/installcheck and koji-docker-cont-working/bin/installcheck differ
+diff -ru koji-docker-not-working/bin/kojid koji-docker-cont-working/bin/kojid
+--- koji-docker-not-working/bin/kojid	2019-02-01 12:26:38.000000000 -0800
++++ koji-docker-cont-working/bin/kojid	2020-05-04 15:43:39.000000000 -0700
+@@ -5170,12 +5170,12 @@
+                    '--mode', 'simple',
+                    '--tempdir', self.workdir]
+         elif self.options.use_createrepo_c:
+-            cmd = ['/usr/bin/mergerepo_c', '--koji']
++            cmd = ['/usr/bin/mergerepo_c', '--pkgorigins','--all']
+         else:
+             cmd = ['/usr/libexec/kojid/mergerepos']
+             cmd.extend(['--tempdir', self.workdir])
+         blocklist = self.repodir + '/blocklist'
+-        cmd.extend(['-a', arch, '-b', blocklist, '-o', self.outdir])
++        cmd.extend(['-a', arch, '-o', self.outdir])
+         if os.path.isfile(groupdata):
+             cmd.extend(['-g', groupdata])
+         for repo in repos:
+Binary files koji-docker-not-working/bin/mergerepo_c and koji-docker-cont-working/bin/mergerepo_c differ
+Binary files koji-docker-not-working/bin/mergesolv and koji-docker-cont-working/bin/mergesolv differ
+Binary files koji-docker-not-working/bin/modifyrepo_c and koji-docker-cont-working/bin/modifyrepo_c differ
+Binary files koji-docker-not-working/bin/modulemd-validator and koji-docker-cont-working/bin/modulemd-validator differ
+Binary files koji-docker-not-working/bin/modulemd-validator-v1 and koji-docker-cont-working/bin/modulemd-validator-v1 differ
+Binary files koji-docker-not-working/bin/repo2solv and koji-docker-cont-working/bin/repo2solv differ
+Binary files koji-docker-not-working/bin/repomdxml2solv and koji-docker-cont-working/bin/repomdxml2solv differ
+Binary files koji-docker-not-working/bin/rpm and koji-docker-cont-working/bin/rpm differ
+Binary files koji-docker-not-working/bin/rpm2archive and koji-docker-cont-working/bin/rpm2archive differ
+Binary files koji-docker-not-working/bin/rpm2cpio and koji-docker-cont-working/bin/rpm2cpio differ
+Binary files koji-docker-not-working/bin/rpmbuild and koji-docker-cont-working/bin/rpmbuild differ

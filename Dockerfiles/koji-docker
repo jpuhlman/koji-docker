@@ -1,4 +1,4 @@
-FROM jpuhlman/koji-base-clear:latest 
+FROM koji-base-clear
 RUN mkdir -p /usr/share/koji-docker
 COPY  \
      install-scripts/deploy-koji-builder.sh \
@@ -15,6 +15,7 @@ COPY  \
      configs/app.list \
      configs/user.list \
      /usr/share/koji-docker/
+
 RUN mkdir -p /usr/sbin/
 COPY install-scripts/hostenv.sh /usr/sbin/
 RUN chmod 755 /usr/sbin/hostenv.sh
@@ -34,4 +35,6 @@ RUN echo "Defaults!/usr/bin/systemctl !requiretty" | tee -a /etc/sudoers.d/visud
 RUN echo "root:$(echo 'password' | openssl passwd -1 -stdin):18099::::::" >> /etc/shadow
 RUN sed -i /usr/lib/systemd/system/swupd-update.service -e "s,/usr/bin/swupd,/bin/echo,"
 RUN sed -i  /usr/lib/python2.7/site-packages/koji/daemon.py -e "s,maxload\ =\ 4.0,maxload\ =\ 8.0,"
+COPY patch-in-place/koji.diff /
+RUN  patch -p1 < koji.diff
 CMD [ "/sbin/init" ]
