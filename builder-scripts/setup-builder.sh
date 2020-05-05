@@ -51,8 +51,16 @@ fi
 
 mkdir -p .koji
 pushd .koji
+
 for config in $CONFIGFILES; do
-    curl -q -O http://$KOJI_HOST/kojifiles/hosts/kojiadmin/$config
+    i=0
+    while ! curl -q -O http://$KOJI_HOST/kojifiles/hosts/kojiadmin/$config; do 
+          i=$(($i + 1))
+          if [ "$i" == "10" ] ; then
+             exit 1
+          fi
+          sleep 3
+    done
 done
 popd
 
