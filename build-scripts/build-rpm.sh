@@ -5,9 +5,10 @@ USER_EMAIL="jenkins@mvista.com"
 USER_NAME="jenkins"
 BUILD_LOCATION=`pwd`/rpm-build
 COPY_LOCATION=`pwd`
-sudo swupd bundle-add os-clr-on-clr
+#sudo swupd bundle-add os-clr-on-clr
+
 if [ ! -e user-setup.sh ] ; then
-	curl -O https://raw.githubusercontent.com/clearlinux/common/master/user-setup.sh
+	curl -O http://gitcentos.mvista.com/cgit/upstream/updated-clearlinux-pkgs/common.git/plain/user-setup.sh 
 	chmod +x user-setup.sh
 fi
 if [ ! -d $BUILD_LOCATION ] ; then
@@ -20,7 +21,7 @@ fi
 if [ -z "$(git config --global user.jenkins)" ] ; then
 	git config --global user.name "$USER_NAME"
 fi
-PACKAGES="rpm librepo libsolv libdnf dnf libmodulemd createrepo_c"
+PACKAGES="rpm librepo libsolv libmodulemd zchunk libdnf dnf createrepo_c"
 mkdir -p $COPY_LOCATION/rpms/
 for package in $PACKAGES; do
     pushd $BUILD_LOCATION
