@@ -64,10 +64,14 @@ for config in $CONFIGFILES; do
 done
 popd
 
+if [ -z "$KOJI_BUILDER_CAPACITY" ] ; then
+   KOJI_BUILDER_CAPACITY=16
+fi
+
 if [ -z "$(koji list-hosts | grep $KOJI_BUILDER)" ] ; then
    ARCH="$(koji list-hosts | grep -v Hostname | while read A B C D E F; do echo $E; done | sort -u)"
    koji add-host $KOJI_BUILDER "$(echo  $ARCH | sed s/,/\ /)"
-   koji edit-host $KOJI_BUILDER --capacity 16
+   koji edit-host $KOJI_BUILDER --capacity $KOJI_BUILDER_CAPACITY 
 fi
 CONFIG_URL=http://$KOJI_HOST/kojifiles/hosts/$KOJI_BUILDER
 while ! curl -O $CONFIG_URL/client.ca ; do
@@ -129,12 +133,15 @@ while true; do
 		popd
 done
 
+if [ -z "$KOJI_BUILDER_MAXJOBS" ] ; then
+	KOJI_BUILDER_MAXJOBS=16
+fi
 cat > /etc/kojid/kojid.conf <<- EOF
 [kojid]
 sleeptime=5
 retry_interval=30
 max_retries=5
-maxjobs=16
+maxjobs=$KOJI_BUILDER_MAXJOBS
 workdir=/tmp/koji
 mockdir=/var/lib/mock
 mockuser=kojibuilder
