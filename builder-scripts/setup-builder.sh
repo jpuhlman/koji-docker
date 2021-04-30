@@ -154,6 +154,8 @@ allowed_scms=$KOJI_SCMS
 cert = /etc/kojid/client.ca
 ca = /etc/kojid/serverca.crt
 serverca = /etc/kojid/serverca.crt
+packager = MontaVista Software
+vendor = MontaVista Software
 EOF
 
 mkdir -p /etc/mock/koji
