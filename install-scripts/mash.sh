@@ -36,7 +36,7 @@ clean_up() {
 		echo $FILENAME
 	done | sort -n | tee $TMPFILE
 
-        # find out how many their are.
+        # find out how many there are.
 	LEN=$(cat $TMPFILE | wc -l )
 
         # How many are left over when wee keep KEEP_NUM
