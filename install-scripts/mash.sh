@@ -21,11 +21,37 @@ MASH_DIR="/srv/mash/$TAG_NAME"
 MASH_TRACKER_FILE="$MASH_DIR"/latest-mash-build
 MASH_TRACKER_DIR="$MASH_DIR"/latest
 MASH_DIR_OLD="$MASH_TRACKER_DIR".old
-
+KEEP_NUM=4
 write_packages_file() {
 	local PKG_DIR="$1"
 	local PKG_FILE="$2"
 	rpm -qp --qf="%{NAME}\t%{VERSION}\t%{RELEASE}\n" "$PKG_DIR"/*.rpm | sort > "$PKG_FILE"
+}
+
+clean_up() {
+	TMPFILE=$(mktemp)
+	pushd $MASH_DIR
+	# Get directories.
+	ls -l | grep ^d | while read A B C D E F G H FILENAME J K; do 
+		echo $FILENAME
+	done | sort -n | tee $TMPFILE
+
+        # find out how many their are.
+	LEN=$(cat $TMPFILE | wc -l )
+
+        # How many are left over when wee keep KEEP_NUM
+	SHORT=$(expr $LEN - $KEEP_NUM)
+        # Remove the older directories.
+	cat $TMPFILE | head -n $SHORT | sort -n | while read DIRNAME; do rm -rf $DIRNAME; done
+
+        # Remove danlginglin links
+	ls -l | grep ^l | grep -v latest | while read A B C D E F G H FILENAME J K; do 
+	   if ! ls $FILENAME/. ; then 
+		rm $I 2>/dev/null
+	   fi
+	done
+	rm -f $TMPFILE
+	popd
 }
 
 if [[ -e "$MASH_TRACKER_FILE" ]]; then
@@ -67,4 +93,5 @@ if [[ "$MASH_BUILD_NUM" -ne "$KOJI_BUILD_NUM" ]]; then
         ln -s "$KOJI_BUILD_NUM" $MASH_DIR/"$DATEID"
 
 	echo "$KOJI_BUILD_NUM" > "$MASH_TRACKER_FILE"
+	clean_up
 fi
