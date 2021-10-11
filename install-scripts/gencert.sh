@@ -16,6 +16,8 @@ if [ -n "$(cat index.txt)" ] ; then
 	NewSerial=$((10#$lastIndex + 1))
 	if [ $NewSerial -lt "10" ] ; then
 		NewSerial="0$NewSerial"
+        elif [ "$(echo -n $NewSerial | wc -m)" != "2" ] ; then
+                NewSerial="0$NewSerial"
 	fi
 	echo $NewSerial > serial
 fi
