@@ -15,7 +15,7 @@ if [ -n "$MASH_TAG_NAME" ] ; then
    TAG_NAME=$MASH_TAG_NAME
 fi
 DISTRO_NAME="$TAG_NAME"
-BUILD_ARCH="${BUILD_ARCH:-x86_64}"
+BUILD_ARCHES="x86_64 i686"
 KOJI_DIR="${KOJI_DIR:-/srv/koji}"
 MASH_DIR="/srv/mash/$TAG_NAME"
 MASH_TRACKER_FILE="$MASH_DIR"/latest-mash-build
@@ -79,11 +79,11 @@ if [[ "$MASH_BUILD_NUM" -ne "$KOJI_BUILD_NUM" ]]; then
 	mkdir -p "$MASH_DIR_NEW"
 	mash --outputdir="$MASH_DIR_NEW" --compsfile="$COMPS_FILE" "$TAG_NAME"
 	rm -f "$COMPS_FILE"
-
-	write_packages_file "$MASH_DIR_NEW"/"$DISTRO_NAME"/"$BUILD_ARCH"/os/Packages "$MASH_DIR_NEW"/"$DISTRO_NAME"/"$BUILD_ARCH"/packages-os
-	write_packages_file "$MASH_DIR_NEW"/"$DISTRO_NAME"/"$BUILD_ARCH"/debug "$MASH_DIR_NEW"/"$DISTRO_NAME"/"$BUILD_ARCH"/packages-debug
-	write_packages_file "$MASH_DIR_NEW"/"$DISTRO_NAME"/source/SRPMS "$MASH_DIR_NEW"/"$DISTRO_NAME"/source/packages-SRPMS
-        
+        for BUILD_ARCH in $BUILD_ARCHES; do  
+	    write_packages_file "$MASH_DIR_NEW"/"$DISTRO_NAME"/"$BUILD_ARCH"/os/Packages "$MASH_DIR_NEW"/"$DISTRO_NAME"/"$BUILD_ARCH"/packages-os
+	    write_packages_file "$MASH_DIR_NEW"/"$DISTRO_NAME"/"$BUILD_ARCH"/debug "$MASH_DIR_NEW"/"$DISTRO_NAME"/"$BUILD_ARCH"/packages-debug
+	    write_packages_file "$MASH_DIR_NEW"/"$DISTRO_NAME"/source/SRPMS "$MASH_DIR_NEW"/"$DISTRO_NAME"/source/packages-SRPMS
+        done
 	if [ -L "$MASH_TRACKER_DIR" -o ! -e $MASH_TRACKER_DIR ] ; then
         	rm -f "$MASH_TRACKER_DIR"
         	ln -s $KOJI_BUILD_NUM $MASH_TRACKER_DIR
