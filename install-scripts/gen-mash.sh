@@ -42,7 +42,7 @@ multilib_method = devel
 tag = dist-$TAG_NAME
 inherit = True
 strict_keys = False
-arches = $RPM_ARCH
+arches = i386 x86_64 
 EOF
 	fi
 	if [ ! -e /etc/systemd/system/mash-$TAG_NAME.service ] ; then
@@ -63,6 +63,8 @@ WantedBy=multi-user.target
 EOF
 	sudo systemctl daemon-reload
 	sudo systemctl enable --now mash-$TAG_NAME
+        sleep 30
+        sudo systemctl enable --now mash-$TAG_NAME
 	fi
 
     done
