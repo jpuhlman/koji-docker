@@ -69,8 +69,8 @@ if [ -z "$KOJI_BUILDER_CAPACITY" ] ; then
 fi
 
 if [ -z "$(koji list-hosts | grep $KOJI_BUILDER)" ] ; then
-   ARCH="$(koji list-hosts | grep -v Hostname | while read A B C D E F; do echo $E; done | sort -u)"
-   koji add-host $KOJI_BUILDER "$(echo  $ARCH | sed s/,/\ /)"
+   ARCH="$(koji list-hosts | grep -v Hostname | while read A B C D E F; do echo $E; done | sort -u | tr '\n' ',' | sed 's/,$//' | tr ',' '\n' | sort -u | tr '\n' ',' | sed 's/,$//' | sed 's/^,//')"
+   koji add-host $KOJI_BUILDER "$(echo  $ARCH | sed s/,/\ /g)"
    koji edit-host $KOJI_BUILDER --capacity $KOJI_BUILDER_CAPACITY 
 fi
 CONFIG_URL=http://$KOJI_HOST/kojifiles/hosts/$KOJI_BUILDER
