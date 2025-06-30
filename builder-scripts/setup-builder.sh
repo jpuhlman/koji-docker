@@ -169,6 +169,7 @@ usermod -G mock kojibuilder
 
 #Add nobest to mock runs:
 sed -e "s/\\['--setopt=deltarpm=False'/\\['--nobest',\\ '--setopt=deltarpm=False'/" -i /usr/lib/python3.6/site-packages/mockbuild/package_manager.py || true
+update-crypto-policies --set LEGACY || true
 
 export NSS_STRICT_NOFORK=DISABLED
 /usr/sbin/kojid --fg --force-lock --verbose &
