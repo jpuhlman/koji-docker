@@ -25,7 +25,7 @@ KEEP_NUM=4
 write_packages_file() {
 	local PKG_DIR="$1"
 	local PKG_FILE="$2"
-	rpm -qp --qf="%{NAME}\t%{VERSION}\t%{RELEASE}\n" "$PKG_DIR"/*.rpm | sort > "$PKG_FILE"
+	rpm -qp --qf="%{NAME}\t%{VERSION}\t%{RELEASE}\n" "$PKG_DIR"/*.rpm | sort > "$PKG_FILE" || true
 }
 
 clean_up() {
