@@ -47,7 +47,7 @@ clean_up() {
         # Remove danlginglin links
 	ls -l | grep ^l | grep -v latest | while read A B C D E F G H FILENAME J K; do 
 	   if ! ls $FILENAME/. ; then 
-		rm -f $I 2>/dev/null
+		rm -f $FILENAME 2>/dev/null
 	   fi
 	done
 	rm -f $TMPFILE
