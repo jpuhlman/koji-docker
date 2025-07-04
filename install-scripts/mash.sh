@@ -89,7 +89,7 @@ if [[ "$MASH_BUILD_NUM" -ne "$KOJI_BUILD_NUM" ]]; then
         	ln -s $KOJI_BUILD_NUM $MASH_TRACKER_DIR
 	fi
         repoMd=$(find  $MASH_DIR_NEW  | grep repomd.xml | grep \/os\/)
-        DATEID=$(ls -T 1 --time-style=+"%y%m%d%H%M" -l $repoMd | cut -d " " -f 6)
+        DATEID=$(ls -T 1 --time-style=+"%y%m%d%H%M" -l $repoMd | cut -d " " -f 6 | tail -n 1)
         ln -s "$KOJI_BUILD_NUM" $MASH_DIR/"$DATEID"
 
 	echo "$KOJI_BUILD_NUM" > "$MASH_TRACKER_FILE"
