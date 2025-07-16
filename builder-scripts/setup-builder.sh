@@ -84,7 +84,7 @@ if [ ! -e /etc/kojid/client.ca ] ; then
    pushd /etc/kojid/
      while true; do
         curl -O $CONFIG_URL/client.ca 
-        if [ -n "$(cat client.ca | grep 'END RSA PRIVATE KEY')" ] ; then
+        if [ -n "$(cat client.ca | grep 'PRIVATE KEY')" ] ; then
            break
         else
            echo Not a valid client certificate, remove and wait.
