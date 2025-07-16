@@ -152,7 +152,6 @@ topurl=http://$KOJI_HOST/kojifiles
 use_createrepo_c=True
 allowed_scms=$KOJI_SCMS
 cert = /etc/kojid/client.ca
-ca = /etc/kojid/serverca.crt
 serverca = /etc/kojid/serverca.crt
 packager = MontaVista Software
 vendor = MontaVista Software
