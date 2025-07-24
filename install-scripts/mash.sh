@@ -167,6 +167,16 @@ EOF
 	    write_packages_file "$MASH_DIR_NEW"/"$DISTRO_NAME"/"$BUILD_ARCH"/debug "$MASH_DIR_NEW"/"$DISTRO_NAME"/"$BUILD_ARCH"/packages-debug
         done
 	write_packages_file "$MASH_DIR_NEW"/"$DISTRO_NAME"/source/SRPMS "$MASH_DIR_NEW"/"$DISTRO_NAME"/source/packages-SRPMS
+        if [ -e $MASH_DIR_NEW/$DISTRO_NAME/source/tree ] ; then
+             mv $MASH_DIR_NEW/$DISTRO_NAME/source/tree/* $MASH_DIR_NEW/$DISTRO_NAME/source/
+             rm -rf $MASH_DIR_NEW/$DISTRO_NAME/source/tree
+        fi
+        if [ -e $MASH_DIR_NEW/$DISTRO_NAME/source/iso ] ; then
+            rm -rf $MASH_DIR_NEW/$DISTRO_NAME/source/iso
+        fi
+        if [ -e $MASH_DIR_NEW/$DISTRO_NAME/source/jigdo ] ; then
+            rm -rf $MASH_DIR_NEW/$DISTRO_NAME/source/jigdo
+        fi
         find "$MASH_DIR_NEW"/"$DISTRO_NAME" | grep media.repo | xargs rm
 	if [ -L "$MASH_TRACKER_DIR" -o ! -e $MASH_TRACKER_DIR ] ; then
         	rm -f "$MASH_TRACKER_DIR"
