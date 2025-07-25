@@ -74,18 +74,74 @@ if [[ "$MASH_BUILD_NUM" -eq "$CURRENT_KOJI_BUILD_NUM" ]]; then
 fi
 VID="$(echo $TAG_NAME | sed s,-,,g | sed s,\\.,,)"
 if [[ "$MASH_BUILD_NUM" -ne "$KOJI_BUILD_NUM" ]]; then
-	COMPS_FILE="$(mktemp)"
-#        echo "<comps>" > $COMPS_FILE
-	koji show-groups --comps dist-"$TAG_NAME"-build > "$COMPS_FILE"
-#        echo "</comps>" >> "$COMPS_FILE"
-        cat $COMPS_FILE
-	MASH_DIR_NEW="$MASH_DIR/$KOJI_BUILD_NUM"
-	rm -rf "$MASH_DIR_NEW"
-	mkdir -p "$MASH_DIR_NEW"
-        COMPOSE_DIR="$MASH_TOP/compose/dist-$TAG_NAME"
-        rm -rf $COMPOSE_DIR
-        mkdir -p $COMPOSE_DIR
-        cat > "$COMPOSE_DIR"/variants.xml << EOF
+# Generate comps.xml
+    COMPS_FILE="$(mktemp)"
+    ALL_PACKAGES=$(mktemp)
+    koji list-tagged dist-"$TAG_NAME" --latest --inherit --rpms | awk '{print $1}' | sed -E 's/-[0-9][^-]*-[^-]*$//' | sort -u > $ALL_PACKAGES
+    COMPS_SNIP=$(mktemp)
+    echo "  <group>
+    <id>all-packages</id>
+    <name>All Packages</name>
+    <packagelist>" > $COMPS_SNIP
+
+    cat $ALL_PACKAGES | while read pkg; do
+        echo "      <packagereq type=\"default\">$pkg</packagereq>"
+    done >> $COMPS_SNIP
+
+    echo "    </packagelist>
+  </group>" >> $COMPS_SNIP
+    rm -f $ALL_PACKAGES
+
+    DEBUG_GROUP=$(koji list-tagged dist-"$TAG_NAME" --latest --rpms | \
+    awk '{print $1}' | grep '\-debuginfo' | \
+    sed -E 's/-[0-9][^-]*-[0-9][^-]*\..*//' | sort -u | \
+    awk 'BEGIN {
+         print "  <group>"
+         print "    <id>debug</id>"
+         print "    <name>Debug Info</name>"
+         print "    <packagelist>"
+    }
+    {
+         printf "      <packagereq type=\"default\">%s</packagereq>\n", $1
+    }
+    END {
+         print "    </packagelist>"
+         print "  </group>"
+    }')
+
+    cat > "$COMPS_FILE" <<EOF
+<?xml version="1.0" encoding="UTF-8"?>
+<comps>
+  <group>
+    <id>build</id>
+    <name>Build Environment</name>
+    <packagelist>
+      <packagereq type="default">build</packagereq>
+    </packagelist>
+  </group>
+
+  <group>
+    <id>srpm-build</id>
+    <name>SRPM Build Environment</name>
+    <packagelist>
+      <packagereq type="default">srpm-build</packagereq>
+    </packagelist>
+  </group>
+EOF
+
+    echo "$DEBUG_GROUP" >> $COMPS_FILE
+    cat $COMPS_SNIP >> $COMPS_FILE
+    rm -f $COMPS_SNIP
+    echo "</comps>" >> "$COMPS_FILE"
+    cat $COMPS_FILE
+
+    MASH_DIR_NEW="$MASH_DIR/$KOJI_BUILD_NUM"
+    rm -rf "$MASH_DIR_NEW"
+    mkdir -p "$MASH_DIR_NEW"
+    COMPOSE_DIR="$MASH_TOP/compose/dist-$TAG_NAME"
+    rm -rf $COMPOSE_DIR
+    mkdir -p $COMPOSE_DIR
+    cat > "$COMPOSE_DIR"/variants.xml << EOF
 <variants>
   <variant id="$VID" name="$TAG_NAME" type="variant">
     <arches>
@@ -95,11 +151,14 @@ if [[ "$MASH_BUILD_NUM" -ne "$KOJI_BUILD_NUM" ]]; then
     <groups>
       <group>build</group>
       <group>srpm-build</group>
+      <group>debug</group>
+      <group>all-packages</group>
     </groups>
   </variant>
 </variants>
 EOF
 
+# Generate pungi.conf
 comps_path="$COMPS_FILE"
         cat > $COMPOSE_DIR/pungi.conf << EOF
 release_name = "$TAG_NAME"
@@ -107,8 +166,11 @@ release_short = "$TAG_NAME"
 release_version = "$MASH_BUILD_NUM"
 
 gather_method = "nodeps"
-#gather_source = "tag"          
-gather_fulltree = True 
+gather_source = "koji"
+greedy_method = "all"
+check_deps = False          
+gather_fulltree = True
+check_arches = True 
 # Mandatory for pungi-koji
 compose_type = "nightly"
 
@@ -138,13 +200,17 @@ sigkeys = [""]
 # No multilib (mimics mash setting)
 multilib = []  # MUST be a list or it will fail validation
 
+create_debug = True
+create_optional = True
+create_source = True
+
 EOF
+
+# Create Mash
         pungi-koji --no-label --config "$COMPOSE_DIR/pungi.conf" --target-dir "$COMPOSE_DIR"
-#	mash --outputdir="$MASH_DIR_NEW" --compsfile="$COMPS_FILE" "$TAG_NAME"
-	rm -f "$COMPS_FILE"
         mkdir -p $MASH_DIR_NEW/$DISTRO_NAME
         cp -a $COMPOSE_DIR/*/compose/$VID/* $MASH_DIR_NEW/$TAG_NAME/
-        
+        # Make pungi output match the previous mash output
         if [ -e $MASH_DIR_NEW/$DISTRO_NAME/source/iso ] ; then
            rm -rf $MASH_DIR_NEW/$DISTRO_NAME/source/iso
         fi
@@ -154,8 +220,11 @@ EOF
         rm -rf $MASH_DIR_NEW/$DISTRO_NAME/*/iso
         for BUILD_ARCH in $BUILD_ARCHES; do
             if [ -e $MASH_DIR_NEW/$DISTRO_NAME/$BUILD_ARCH/debug/tree ] ; then
-               mv $MASH_DIR_NEW/$DISTRO_NAME/$BUILD_ARCH/debug/tree/* $MASH_DIR_NEW/$DISTRO_NAME/$BUILD_ARCH/debug/
+               mv $MASH_DIR_NEW/$DISTRO_NAME/$BUILD_ARCH/debug/tree/Packages/* $MASH_DIR_NEW/$DISTRO_NAME/$BUILD_ARCH/debug/
                rm -rf $MASH_DIR_NEW/$DISTRO_NAME/$BUILD_ARCH/debug/tree
+               pushd $MASH_DIR_NEW/$DISTRO_NAME/$BUILD_ARCH/debug/
+               createrepo_c .
+               popd
             fi
             if [ -e $MASH_DIR_NEW/$DISTRO_NAME/$BUILD_ARCH/iso ] ; then
                rm -rf $MASH_DIR_NEW/$DISTRO_NAME/$BUILD_ARCH/iso
@@ -166,9 +235,11 @@ EOF
 	    write_packages_file "$MASH_DIR_NEW"/"$DISTRO_NAME"/"$BUILD_ARCH"/os/Packages "$MASH_DIR_NEW"/"$DISTRO_NAME"/"$BUILD_ARCH"/packages-os
 	    write_packages_file "$MASH_DIR_NEW"/"$DISTRO_NAME"/"$BUILD_ARCH"/debug "$MASH_DIR_NEW"/"$DISTRO_NAME"/"$BUILD_ARCH"/packages-debug
         done
-	write_packages_file "$MASH_DIR_NEW"/"$DISTRO_NAME"/source/SRPMS "$MASH_DIR_NEW"/"$DISTRO_NAME"/source/packages-SRPMS
         if [ -e $MASH_DIR_NEW/$DISTRO_NAME/source/tree ] ; then
-             mv $MASH_DIR_NEW/$DISTRO_NAME/source/tree/* $MASH_DIR_NEW/$DISTRO_NAME/source/
+             mv $MASH_DIR_NEW/$DISTRO_NAME/source/tree/Packages $MASH_DIR_NEW/$DISTRO_NAME/source/SRPMS
+             pushd $MASH_DIR_NEW/$DISTRO_NAME/source/SRPMS
+             createrepo_c .
+             popd
              rm -rf $MASH_DIR_NEW/$DISTRO_NAME/source/tree
         fi
         if [ -e $MASH_DIR_NEW/$DISTRO_NAME/source/iso ] ; then
@@ -177,6 +248,7 @@ EOF
         if [ -e $MASH_DIR_NEW/$DISTRO_NAME/source/jigdo ] ; then
             rm -rf $MASH_DIR_NEW/$DISTRO_NAME/source/jigdo
         fi
+	write_packages_file "$MASH_DIR_NEW"/"$DISTRO_NAME"/source/SRPMS "$MASH_DIR_NEW"/"$DISTRO_NAME"/source/packages-SRPMS
         find "$MASH_DIR_NEW"/"$DISTRO_NAME" | grep media.repo | xargs rm
 	if [ -L "$MASH_TRACKER_DIR" -o ! -e $MASH_TRACKER_DIR ] ; then
         	rm -f "$MASH_TRACKER_DIR"
