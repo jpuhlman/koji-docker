@@ -220,7 +220,7 @@ EOF
         rm -rf $MASH_DIR_NEW/$DISTRO_NAME/*/iso
         for BUILD_ARCH in $BUILD_ARCHES; do
             if [ -e $MASH_DIR_NEW/$DISTRO_NAME/$BUILD_ARCH/debug/tree ] ; then
-               mv $MASH_DIR_NEW/$DISTRO_NAME/$BUILD_ARCH/debug/tree/Packages/* $MASH_DIR_NEW/$DISTRO_NAME/$BUILD_ARCH/debug/
+               mv $MASH_DIR_NEW/$DISTRO_NAME/$BUILD_ARCH/debug/tree/Packages/* $MASH_DIR_NEW/$DISTRO_NAME/$BUILD_ARCH/debug/ || true
                rm -rf $MASH_DIR_NEW/$DISTRO_NAME/$BUILD_ARCH/debug/tree
                pushd $MASH_DIR_NEW/$DISTRO_NAME/$BUILD_ARCH/debug/
                createrepo_c .
